@@ -6,6 +6,7 @@ import { AuthController } from "./modules/auth/auth.controller.ts";
 import { createAuthRouter } from "./modules/auth/auth.routes.ts";
 import { errorHandler } from "./middlewares/error-handler.ts";
 import { requestLogger } from './middlewares/request-logger.ts';
+import { createRequireAuth } from './middlewares/require-auth.ts';
 
 export const createApp = (dataSource: DataSource) => {
     const app = express()
@@ -21,7 +22,8 @@ export const createApp = (dataSource: DataSource) => {
     // ── Composición por feature ──
     const authService = new AuthService(dataSource);
     const authController = new AuthController(authService);
-    app.use("/auth", createAuthRouter(authController));
+    const requireAuth = createRequireAuth(authService)
+    app.use("/auth", createAuthRouter(authController, requireAuth));
 
     app.use(errorHandler)
 

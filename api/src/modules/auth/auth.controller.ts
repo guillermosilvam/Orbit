@@ -1,9 +1,8 @@
 import type { Request, Response } from "express";
 import type { AuthService } from "./auth.service.ts";
-import { SESSION_TTL_MS } from "./auth.service.ts";
-import { loginSchema, registerSchema } from "./dto/auth.dto.ts";
+import { SESSION_COOKIE, SESSION_TTL_MS } from "./auth.constants.ts";
+import { loginSchema, registerSchema, toUserResponseDto } from "./dto/auth.dto.ts";
 
-const SESSION_COOKIE = "session";
 
 const cookieOptions = {
     httpOnly: true,
@@ -36,4 +35,8 @@ export class AuthController {
         res.clearCookie(SESSION_COOKIE, { ...cookieOptions, maxAge: undefined });
         res.status(204).send();
     };
+
+    me = async (req: Request, res: Response): Promise<void> => {
+        res.json({ user: toUserResponseDto(req.user!) })
+    }
 }
