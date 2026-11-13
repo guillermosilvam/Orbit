@@ -8,7 +8,7 @@ const main = async (): Promise<void> => {
   await AppDataSource.initialize();
   console.log("🟢 PostgreSQL connected");
 
-  const app = createApp();
+  const app = createApp(AppDataSource);
   const server = app.listen(env.PORT, () => {
     console.log(`🚀 API on http://localhost:${env.PORT}`);
   });

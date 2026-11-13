@@ -10,8 +10,8 @@ import {
 import { User } from "./user.entity.ts";
 
 
-@Entity("auth_sessions")
-export class AuthSession {
+@Entity("sessions")
+export class Session {
   @PrimaryGeneratedColumn("uuid")
   id!: string;
 
@@ -24,14 +24,11 @@ export class AuthSession {
   user!: User;
 
   @Index({ unique: true })
-  @Column({ name: "refresh_token_hash", type: "varchar", length: 64 })
-  refreshTokenHash!: string;
+  @Column({ name: "token_hash", type: "varchar", length: 64 })
+  tokenHash!: string;
 
   @Column({ name: "expires_at", type: "timestamptz" })
   expiresAt!: Date;
-
-  @Column({ name: "revoked_at", type: "timestamptz", nullable: true })
-  revokedAt!: Date | null;
 
   @CreateDateColumn({ name: "created_at", type: "timestamptz" })
   createdAt!: Date;
