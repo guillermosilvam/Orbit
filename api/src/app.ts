@@ -1,11 +1,17 @@
 import cookieParser from 'cookie-parser';
 import express from 'express'
 import type { DataSource } from 'typeorm';
+
+import { errorHandler } from "./middlewares/error-handler.ts";
+import { requestLogger } from './middlewares/request-logger.ts';
+
 import { AuthService } from "./modules/auth/auth.service.ts";
 import { AuthController } from "./modules/auth/auth.controller.ts";
 import { createAuthRouter } from "./modules/auth/auth.routes.ts";
-import { errorHandler } from "./middlewares/error-handler.ts";
-import { requestLogger } from './middlewares/request-logger.ts';
+
+import { WorkspaceService } from "./modules/workspaces/workspace.service.ts";
+import { WorkspaceController } from "./modules/workspaces/workspace.controller.ts";
+import { createWorkspaceRouter } from "./modules/workspaces/workspace.routes.ts";
 
 export const createApp = (dataSource: DataSource) => {
     const app = express()
@@ -18,10 +24,20 @@ export const createApp = (dataSource: DataSource) => {
         res.json({ status: "ok", uptime: process.uptime() })
     })
 
-    // ── Composición por feature ──
+    // -- SHARED --------------------------------------------
     const authService = new AuthService(dataSource);
+
+
+    // -- AUTH ----------------------------------------------
     const authController = new AuthController(authService);
     app.use("/auth", createAuthRouter(authController));
+
+
+    // -- WORKSPACE -----------------------------------------
+    const workspaceService = new WorkspaceService(dataSource);
+    const workspaceController = new WorkspaceController(workspaceService);
+    app.use("/workspaces", createWorkspaceRouter(workspaceController, requireAuth));
+
 
     app.use(errorHandler)
 
