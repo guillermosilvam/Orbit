@@ -4,6 +4,7 @@ import type { DataSource } from 'typeorm';
 
 import { errorHandler } from "./middlewares/error-handler.ts";
 import { requestLogger } from './middlewares/request-logger.ts';
+import { createRequireAuth } from './middlewares/require-auth.ts';
 
 import { AuthService } from "./modules/auth/auth.service.ts";
 import { AuthController } from "./modules/auth/auth.controller.ts";
@@ -26,11 +27,12 @@ export const createApp = (dataSource: DataSource) => {
 
     // -- SHARED --------------------------------------------
     const authService = new AuthService(dataSource);
-
+    const requireAuth = createRequireAuth(authService)
+    
 
     // -- AUTH ----------------------------------------------
     const authController = new AuthController(authService);
-    app.use("/auth", createAuthRouter(authController));
+    app.use("/auth", createAuthRouter(authController, requireAuth));
 
 
     // -- WORKSPACE -----------------------------------------

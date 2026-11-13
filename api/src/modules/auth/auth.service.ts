@@ -8,8 +8,7 @@ import type {
     RegisterInputDto,
 } from "./dto/auth.dto.ts";
 import { toUserResponseDto } from "./dto/auth.dto.ts";
-
-export const SESSION_TTL_MS = 7 * 24 * 60 * 60 * 1000;
+import { SESSION_TTL_MS } from "./auth.constants.ts";
 
 
 export class AuthService {
