@@ -14,6 +14,11 @@ import { WorkspaceService } from "./modules/workspaces/workspace.service.ts";
 import { WorkspaceController } from "./modules/workspaces/workspace.controller.ts";
 import { createWorkspaceRouter } from "./modules/workspaces/workspace.routes.ts";
 
+import { ProjectService } from "./modules/projects/project.service.ts";
+import { ProjectController } from "./modules/projects/project.controller.ts";
+import { createProjectRouter } from "./modules/projects/project.routes.ts";
+import { requireWorkspaceRole } from "./middlewares/require-workspace-role.ts";
+
 export const createApp = (dataSource: DataSource) => {
     const app = express()
 
@@ -28,7 +33,7 @@ export const createApp = (dataSource: DataSource) => {
     // -- SHARED --------------------------------------------
     const authService = new AuthService(dataSource);
     const requireAuth = createRequireAuth(authService)
-    
+
 
     // -- AUTH ----------------------------------------------
     const authController = new AuthController(authService);
@@ -38,8 +43,22 @@ export const createApp = (dataSource: DataSource) => {
     // -- WORKSPACE -----------------------------------------
     const workspaceService = new WorkspaceService(dataSource);
     const workspaceController = new WorkspaceController(workspaceService);
-    app.use("/workspaces", createWorkspaceRouter(workspaceController, requireAuth));
+    
+    
+    // -- Projects ------------------------------------------
+    const projectService = new ProjectService(dataSource);
+    const projectController = new ProjectController(projectService);
+    const requireWorkspaceAdmin = requireWorkspaceRole(workspaceService, "owner", "admin");
+    const requireWorkspaceMember = requireWorkspaceRole(workspaceService);
 
+    app.use(
+        "/workspaces/:workspaceSlug/projects",
+        requireAuth,
+        createProjectRouter(projectController, requireWorkspaceAdmin, requireWorkspaceMember),
+    );
+    
+    // workspace
+    app.use("/workspaces", createWorkspaceRouter(workspaceController, requireAuth));
 
     app.use(errorHandler)
 
