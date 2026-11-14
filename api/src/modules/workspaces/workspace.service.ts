@@ -62,7 +62,22 @@ export class WorkspaceService {
         return { ...toWorkspaceResponseDto(workspace), role: membership.role }
     }
 
-    
+
+    async resolveMembership(
+        slug: string, userId: string
+    ): Promise<{ workspace: Workspace; member: WorkspaceMember }> {
+        const workspace = await this.workspaceRepo.findOne({ where: { slug } });
+        if (!workspace) throw AppError.notFound("Workspace not found");
+
+        const member = await this.memberRepo.findOne({
+            where: { workspaceId: workspace.id, userId },
+        });
+        if (!member) throw AppError.notFound("Workspace not found");
+
+        return { workspace, member };
+    }
+
+
 
     private async generateUniqueSlug(name: string, manager: EntityManager): Promise<string> {
         const base = slugify(name);
