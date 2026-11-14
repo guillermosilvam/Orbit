@@ -8,6 +8,7 @@ declare global {
       user?: User;
       workspace?: Workspace;
       member?: WorkspaceMember;
+      project?: Project;
     }
   }
 }

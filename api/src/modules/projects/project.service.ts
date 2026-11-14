@@ -71,4 +71,10 @@ export class ProjectService {
         await this.projectRepo.delete({ id: project.id });
     }
 
+    async findEntityByKey(workspaceId: string, key: string): Promise<Project | null> {
+        return this.projectRepo.findOne({
+            where: { workspaceId, key: key.toUpperCase() },
+        });
+    }
+
 }

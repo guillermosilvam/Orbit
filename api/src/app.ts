@@ -19,6 +19,11 @@ import { ProjectController } from "./modules/projects/project.controller.ts";
 import { createProjectRouter } from "./modules/projects/project.routes.ts";
 import { requireWorkspaceRole } from "./middlewares/require-workspace-role.ts";
 
+import { TaskService } from "./modules/tasks/task.service.ts";
+import { TaskController } from "./modules/tasks/task.controller.ts";
+import { createTaskRouter } from "./modules/tasks/task.routes.ts";
+import { createRequireProject } from "./middlewares/require-project.ts";
+
 export const createApp = (dataSource: DataSource) => {
     const app = express()
 
@@ -28,6 +33,7 @@ export const createApp = (dataSource: DataSource) => {
 
 
     const workspaceService = new WorkspaceService(dataSource);
+    const projectService = new ProjectService(dataSource);
 
     // -- MIDDLEWARES ---------------------------------------
     const requireWorkspaceMember = requireWorkspaceRole(workspaceService);
@@ -37,15 +43,22 @@ export const createApp = (dataSource: DataSource) => {
     // -- SHARED --------------------------------------------
     const authService = new AuthService(dataSource);
     const requireAuth = createRequireAuth(authService)
-
+    const requireProject = createRequireProject(projectService);
 
     // -- AUTH ----------------------------------------------
     const authController = new AuthController(authService);
     app.use("/auth", createAuthRouter(authController, requireAuth));
 
+    // -- TASKS ---------------------------------------------
+    const taskService = new TaskService(dataSource);
+    const taskController = new TaskController(taskService);
+    app.use(
+        "/workspaces/:workspaceSlug/projects/:projectKey/tasks",
+        requireAuth,
+        createTaskRouter(taskController, requireWorkspaceMember, requireProject),
+    );
 
     // -- PROJECTS ------------------------------------------
-    const projectService = new ProjectService(dataSource);
     const projectController = new ProjectController(projectService);
     app.use(
         "/workspaces/:workspaceSlug/projects",
