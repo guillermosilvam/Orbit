@@ -8,9 +8,10 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
+  type Relation
 } from "typeorm";
-import { User } from "./user.entity.ts";
-import { WorkspaceMember } from "./workspace-member.entity.ts"
+import { User } from "./user.entity";
+import { WorkspaceMember } from "./workspace-member.entity"
 
 
 @Entity("workspaces")
@@ -33,7 +34,7 @@ export class Workspace {
   owner!: User;
 
   @OneToMany(() => WorkspaceMember, (m) => m.workspace)
-  members!: WorkspaceMember[];
+  members!: Relation<WorkspaceMember[]>;
 
   @CreateDateColumn({ name: "created_at", type: "timestamptz" })
   createdAt!: Date;

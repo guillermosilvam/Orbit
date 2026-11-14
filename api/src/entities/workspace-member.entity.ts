@@ -6,9 +6,10 @@ import {
   JoinColumn,
   ManyToOne,
   PrimaryGeneratedColumn,
+  type Relation
 } from "typeorm";
-import { Workspace } from "./workspace.entity.ts";
-import { User } from "./user.entity.ts";
+import { Workspace } from "./workspace.entity";
+import { User } from "./user.entity";
 
 export type WorkspaceRole = "owner" | "admin" | "member";
 
@@ -23,7 +24,7 @@ export class WorkspaceMember {
 
   @ManyToOne(() => Workspace, (w) => w.members, { onDelete: "CASCADE" })
   @JoinColumn({ name: "workspace_id" })
-  workspace!: Workspace;
+  workspace!: Relation<Workspace>;
 
   @Column({ name: "user_id", type: "uuid" })
   userId!: string;
