@@ -26,9 +26,13 @@ export const createApp = (dataSource: DataSource) => {
     app.use(cookieParser());
     app.use(requestLogger);
 
-    app.get("/health", (_req, res) => {
-        res.json({ status: "ok", uptime: process.uptime() })
-    })
+
+    const workspaceService = new WorkspaceService(dataSource);
+
+    // -- MIDDLEWARES ---------------------------------------
+    const requireWorkspaceMember = requireWorkspaceRole(workspaceService);
+    const requireWorkspaceAdmin = requireWorkspaceRole(workspaceService, "owner", "admin");
+    const requireWorkspaceOwner = requireWorkspaceRole(workspaceService, "owner");
 
     // -- SHARED --------------------------------------------
     const authService = new AuthService(dataSource);
@@ -40,25 +44,27 @@ export const createApp = (dataSource: DataSource) => {
     app.use("/auth", createAuthRouter(authController, requireAuth));
 
 
-    // -- WORKSPACE -----------------------------------------
-    const workspaceService = new WorkspaceService(dataSource);
-    const workspaceController = new WorkspaceController(workspaceService);
-    
-    
-    // -- Projects ------------------------------------------
+    // -- PROJECTS ------------------------------------------
     const projectService = new ProjectService(dataSource);
     const projectController = new ProjectController(projectService);
-    const requireWorkspaceAdmin = requireWorkspaceRole(workspaceService, "owner", "admin");
-    const requireWorkspaceMember = requireWorkspaceRole(workspaceService);
-
     app.use(
         "/workspaces/:workspaceSlug/projects",
         requireAuth,
         createProjectRouter(projectController, requireWorkspaceAdmin, requireWorkspaceMember),
     );
-    
-    // workspace
-    app.use("/workspaces", createWorkspaceRouter(workspaceController, requireAuth));
+
+    // -- WORKSPACE -----------------------------------------
+    const workspaceController = new WorkspaceController(workspaceService);
+    app.use(
+        "/workspaces",
+        createWorkspaceRouter(
+            workspaceController,
+            requireAuth,
+            requireWorkspaceMember,
+            requireWorkspaceOwner,
+        ),
+    );
+
 
     app.use(errorHandler)
 

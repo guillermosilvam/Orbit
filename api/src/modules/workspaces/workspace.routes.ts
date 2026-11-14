@@ -3,14 +3,17 @@ import type { WorkspaceController } from "./workspace.controller";
 
 export function createWorkspaceRouter(
     controller: WorkspaceController,
-    requireAuth: RequestHandler
+    requireAuth: RequestHandler,
+    requireWorkspaceMember: RequestHandler,
+    requireWorkspaceOwner: RequestHandler,
 ): Router {
     const router = Router()
 
     router.use(requireAuth)
     router.post("/", controller.create);
     router.get("/", controller.findAll);
-    router.get(":slug", controller.findOne);
+    router.get("/:workspaceSlug", requireWorkspaceMember, controller.findOne);
+    router.delete("/:workspaceSlug", requireWorkspaceOwner, controller.delete);
 
     return router
 }

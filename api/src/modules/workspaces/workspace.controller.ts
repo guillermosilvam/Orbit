@@ -26,4 +26,10 @@ export class WorkspaceController {
         const workspace = await this.workspaceService.findBySlugForUser(slug, req.user.id)
         res.json({ workspace })
     }
+
+    delete = async (req: Request, res: Response): Promise<void> => {
+        if (!req.workspace) throw AppError.unauthorized();
+        await this.workspaceService.delete(req.workspace.id);
+        res.status(204).send();
+    };
 }

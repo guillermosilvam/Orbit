@@ -62,6 +62,10 @@ export class WorkspaceService {
         return { ...toWorkspaceResponseDto(workspace), role: membership.role }
     }
 
+    async delete(workspaceId: string): Promise<void> {
+        await this.workspaceRepo.delete({ id: workspaceId });
+    }
+
 
     async resolveMembership(
         slug: string, userId: string
