@@ -1,5 +1,5 @@
 import { AppError } from '../../errors/app-error';
-import { createWorkspaceSchema } from './dto/workspace.dto';
+import { createWorkspaceSchema, toWorkspaceResponseDto } from './dto/workspace.dto';
 import type { WorkspaceService } from './workspace.service';
 import type { Request, Response } from 'express'
 
@@ -20,11 +20,13 @@ export class WorkspaceController {
     }
 
     findOne = async (req: Request, res: Response): Promise<void> => {
-        if (!req.user) throw AppError.unauthorized()
-        const { slug } = req.params;
-        if (typeof slug !== "string") throw AppError.notFound("Workspace not found")
-        const workspace = await this.workspaceService.findBySlugForUser(slug, req.user.id)
-        res.json({ workspace })
+        if (!req.workspace || !req.member) throw AppError.unauthorized()
+        res.json({
+            workspace: {
+                ...toWorkspaceResponseDto(req.workspace),
+                role: req.member.role,
+            },
+        });
     }
 
     delete = async (req: Request, res: Response): Promise<void> => {

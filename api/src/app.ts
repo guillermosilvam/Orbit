@@ -24,6 +24,12 @@ import { TaskController } from "./modules/tasks/task.controller.ts";
 import { createTaskRouter } from "./modules/tasks/task.routes.ts";
 import { createRequireProject } from "./middlewares/require-project.ts";
 
+import { InvitationService } from "./modules/invitations/invitation.service.ts";
+import { InvitationController } from "./modules/invitations/invitation.controller.ts";
+import { InvitationAcceptController } from "./modules/invitations/invitation-accept.controller.ts";
+import { createInvitationRouter } from "./modules/invitations/invitation.routes.ts";
+import { createInvitationAcceptRouter } from "./modules/invitations/invitation-accept.routes.ts";
+
 export const createApp = (dataSource: DataSource) => {
     const app = express()
 
@@ -44,6 +50,9 @@ export const createApp = (dataSource: DataSource) => {
     const authService = new AuthService(dataSource);
     const requireAuth = createRequireAuth(authService)
     const requireProject = createRequireProject(projectService);
+    const invitationService = new InvitationService(dataSource);
+    const invitationController = new InvitationController(invitationService);
+    const invitationAcceptController = new InvitationAcceptController(invitationService);
 
     // -- AUTH ----------------------------------------------
     const authController = new AuthController(authService);
@@ -65,6 +74,20 @@ export const createApp = (dataSource: DataSource) => {
         requireAuth,
         createProjectRouter(projectController, requireWorkspaceAdmin, requireWorkspaceMember),
     );
+
+
+    // -- INVITATIONS -------------------------------
+    app.use(
+        "/invitations",
+        requireAuth,
+        createInvitationAcceptRouter(invitationAcceptController, requireAuth),
+    );
+    app.use(
+        "/workspaces/:workspaceSlug/invitations",
+        requireAuth,
+        createInvitationRouter(invitationController, requireWorkspaceAdmin),
+    );
+
 
     // -- WORKSPACE -----------------------------------------
     const workspaceController = new WorkspaceController(workspaceService);
