@@ -1,49 +1,15 @@
-import { z } from "zod";
-import type { Task, TaskPriority, TaskStatus } from "../../../entities/task.entity.ts";
+import type { Task } from "../../../entities/task.entity.ts";
+import {
+  TASK_PRIORITIES,
+  TASK_STATUSES,
+  createTaskSchema,
+  updateTaskSchema,
+} from "@orbit/shared/schemas/task.schema";
+import type { CreateTaskInputDto, UpdateTaskInputDto } from "@orbit/shared/schemas/task.schema";
+import type { TaskResponseDto } from "@orbit/shared/types";
 
-export const TASK_STATUSES = ["todo", "in_progress", "done"] as const;
-export const TASK_PRIORITIES = ["low", "medium", "high", "urgent"] as const;
-
-const statusSchema = z.enum(TASK_STATUSES);
-const prioritySchema = z.enum(TASK_PRIORITIES);
-
-export const createTaskSchema = z.object({
-  title: z.string().trim().min(1).max(200),
-  description: z.string().trim().max(5000).optional(),
-  status: statusSchema.optional(),
-  priority: prioritySchema.optional(),
-  assigneeId: z.uuid().nullable().optional(),
-  dueDate: z.iso.datetime().nullable().optional(),
-});
-
-export const updateTaskSchema = z.object({
-  title: z.string().trim().min(1).max(200).optional(),
-  description: z.string().trim().max(5000).nullable().optional(),
-  status: statusSchema.optional(),
-  priority: prioritySchema.optional(),
-  assigneeId: z.uuid().nullable().optional(),
-  dueDate: z.iso.datetime().nullable().optional(),
-  position: z.coerce.number().optional(),
-});
-
-export type CreateTaskInputDto = z.infer<typeof createTaskSchema>;
-export type UpdateTaskInputDto = z.infer<typeof updateTaskSchema>;
-
-export type TaskResponseDto = {
-  id: string;
-  identifier: string;
-  number: number;
-  projectId: string;
-  title: string;
-  description: string | null;
-  status: TaskStatus;
-  priority: TaskPriority;
-  position: number;
-  assigneeId: string | null;
-  dueDate: string | null;
-  createdAt: string;
-  updatedAt: string;
-};
+export { TASK_PRIORITIES, TASK_STATUSES, createTaskSchema, updateTaskSchema };
+export type { CreateTaskInputDto, TaskResponseDto, UpdateTaskInputDto };
 
 export function toTaskResponseDto(t: Task, projectKey: string): TaskResponseDto {
   return {

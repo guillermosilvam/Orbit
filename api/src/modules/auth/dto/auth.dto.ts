@@ -1,33 +1,10 @@
-import { z } from 'zod'
 import { User } from '../../../entities/user.entity'
+import { loginSchema, registerSchema } from "@orbit/shared/schemas/auth.schema";
+import type { LoginInputDto, RegisterInputDto } from "@orbit/shared/schemas/auth.schema";
+import type { AuthResponseDto, UserResponseDto } from "@orbit/shared/types";
 
-export const registerSchema = z.object({
-    email: z.email().transform((v) => v.toLowerCase()),
-    password: z.string().min(8).max(100),
-    name: z.string().trim().min(1).max(100)
-})
-
-export const loginSchema = z.object({
-    email: z.email().transform((v) => v.toLowerCase()),
-    password: z.string().min(1)
-})
-
-export type RegisterInputDto = z.infer<typeof registerSchema>
-export type LoginInputDto = z.infer<typeof loginSchema>
-
-
-// -- OUTPUT ---------------------------------------------------------------------------------------
-
-export type UserResponseDto = {
-    id: string;
-    email: string;
-    name: string;
-    createdAt: string;
-}
-
-export type AuthResponseDto = {
-  user: UserResponseDto;
-};
+export { loginSchema, registerSchema };
+export type { AuthResponseDto, LoginInputDto, RegisterInputDto, UserResponseDto };
 
 
 export function toUserResponseDto(user: User): UserResponseDto {

@@ -1,48 +1,27 @@
-import { z } from 'zod'
 import type { Workspace } from '../../../entities/workspace.entity'
-import type { WorkspaceRole, WorkspaceMember } from '../../../entities/workspace-member.entity'
+import type { WorkspaceMember } from '../../../entities/workspace-member.entity'
+import {
+    createWorkspaceSchema,
+    updateMemberRoleSchema,
+} from "@orbit/shared/schemas/workspace.schema";
+import type {
+    CreateWorkspaceInputDto,
+    UpdateMemberRoleInputDto,
+} from "@orbit/shared/schemas/workspace.schema";
+import type {
+    WorkspaceMemberResponseDto,
+    WorkspaceResponseDto,
+    WorkspaceWithRoleDto,
+} from "@orbit/shared/types";
 
-// -- INPUT ------------------------------------------------
-export const createWorkspaceSchema = z.object({
-    name: z.string().trim().min(1).max(100)
-})
-
-export type CreateWorkspaceInputDto = z.infer<typeof createWorkspaceSchema>
-
-export const updateMemberRoleSchema = z.object({
-    role: z.enum(["admin", "member"]),
-});
-
-export type UpdateMemberRoleInputDto = z.infer<typeof updateMemberRoleSchema>;
-
-// -- OUTPUT -----------------------------------------------
-
-export type WorkspaceResponseDto = {
-    id: string;
-    name: string;
-    slug: string;
-    ownerId: string;
-    createdAt: string;
-    updatedAt: string;
-}
-
-export type WorkspaceWithRoleDto = WorkspaceResponseDto & {
-    role: WorkspaceRole
-}
-
-
-export type WorkspaceMemberResponseDto = {
-    id: string;
-    userId: string;
-    role: WorkspaceRole;
-    createdAt: string;
-    user: {
-        id: string;
-        email: string;
-        name: string;
-    };
+export { createWorkspaceSchema, updateMemberRoleSchema };
+export type {
+    CreateWorkspaceInputDto,
+    UpdateMemberRoleInputDto,
+    WorkspaceMemberResponseDto,
+    WorkspaceResponseDto,
+    WorkspaceWithRoleDto,
 };
-
 
 // -- MAPPER -----------------------------------------------
 export function toWorkspaceMemberResponseDto(m: WorkspaceMember): WorkspaceMemberResponseDto {

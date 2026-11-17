@@ -10,8 +10,8 @@ import {
 } from "typeorm";
 import { Workspace } from "./workspace.entity";
 import { User } from "./user.entity";
-
-export type WorkspaceRole = "owner" | "admin" | "member";
+import type { WorkspaceRole } from "@orbit/shared/schemas/workspace.schema";
+export type { WorkspaceRole };
 
 @Entity("workspace_members")
 @Index(["workspaceId", "userId"], { unique: true })
