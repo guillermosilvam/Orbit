@@ -2,8 +2,17 @@ import type { EntityManager, Repository } from "typeorm";
 import { Workspace } from "../../entities/workspace.entity";
 import { WorkspaceMember } from "../../entities/workspace-member.entity";
 import type { DataSource } from "typeorm/browser";
-import { toWorkspaceResponseDto, type CreateWorkspaceInputDto, type WorkspaceResponseDto, type WorkspaceWithRoleDto } from "./dto/workspace.dto";
+import { 
+    toWorkspaceResponseDto,
+    toWorkspaceMemberResponseDto,
+    type CreateWorkspaceInputDto, 
+    type WorkspaceResponseDto, 
+    type WorkspaceWithRoleDto,
+    type UpdateMemberRoleInputDto,
+    type WorkspaceMemberResponseDto
+} from "./dto/workspace.dto";
 import { AppError } from "../../errors/app-error";
+
 
 
 export class WorkspaceService {
@@ -79,6 +88,76 @@ export class WorkspaceService {
         if (!member) throw AppError.notFound("Workspace not found");
 
         return { workspace, member };
+    }
+
+
+    // -- USER MANAGEMENT -------------------------------------------
+    async listMembers(workspaceId: string): Promise<WorkspaceMemberResponseDto[]> {
+        const members = await this.memberRepo.find({
+            where: { workspaceId },
+            relations: { user: true },
+            order: { createdAt: "ASC" },
+        });
+        return members.map(toWorkspaceMemberResponseDto);
+    }
+
+    async removeMember(
+        workspaceId: string,
+        targetUserId: string,
+        actorId: string,
+    ): Promise<void> {
+        const target = await this.memberRepo.findOne({
+            where: { workspaceId, userId: targetUserId },
+        });
+        if (!target) throw AppError.notFound("Member not found");
+
+        if (target.role === "owner") {
+            throw AppError.forbidden("You cannot remove the workspace owner");
+        }
+        if (targetUserId === actorId) {
+            throw AppError.forbidden("Use “Exit workspace” to leave it");
+        }
+
+        await this.memberRepo.delete({ id: target.id });
+    }
+
+    async leaveWorkspace(workspaceId: string, userId: string): Promise<void> {
+        const member = await this.memberRepo.findOne({
+            where: { workspaceId, userId },
+        });
+        if (!member) throw AppError.notFound("You are not a member of this workspace");
+
+        if (member.role === "owner") {
+            throw AppError.forbidden(
+                "The owner cannot leave without transferring ownership of the workspace",
+            );
+        }
+
+        await this.memberRepo.delete({ id: member.id });
+    }
+
+    async updateMemberRole(
+        workspaceId: string,
+        targetUserId: string,
+        newRole: UpdateMemberRoleInputDto["role"],
+        actorId: string,
+    ): Promise<WorkspaceMemberResponseDto> {
+        const target = await this.memberRepo.findOne({
+            where: { workspaceId, userId: targetUserId },
+            relations: { user: true },
+        });
+        if (!target) throw AppError.notFound("Member not found");
+
+        if (target.role === "owner") {
+            throw AppError.forbidden("You can not change the owner's role");
+        }
+        if (targetUserId === actorId) {
+            throw AppError.forbidden("You can not change your own role");
+        }
+
+        target.role = newRole;
+        await this.memberRepo.save(target);
+        return toWorkspaceMemberResponseDto(target);
     }
 
 

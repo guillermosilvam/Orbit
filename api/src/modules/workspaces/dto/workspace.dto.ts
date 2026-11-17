@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { Workspace } from '../../../entities/workspace.entity'
-import type { WorkspaceRole } from '../../../entities/workspace-member.entity'
+import type { WorkspaceRole, WorkspaceMember } from '../../../entities/workspace-member.entity'
 
 // -- INPUT ------------------------------------------------
 export const createWorkspaceSchema = z.object({
@@ -8,6 +8,12 @@ export const createWorkspaceSchema = z.object({
 })
 
 export type CreateWorkspaceInputDto = z.infer<typeof createWorkspaceSchema>
+
+export const updateMemberRoleSchema = z.object({
+    role: z.enum(["admin", "member"]),
+});
+
+export type UpdateMemberRoleInputDto = z.infer<typeof updateMemberRoleSchema>;
 
 // -- OUTPUT -----------------------------------------------
 
@@ -24,7 +30,34 @@ export type WorkspaceWithRoleDto = WorkspaceResponseDto & {
     role: WorkspaceRole
 }
 
+
+export type WorkspaceMemberResponseDto = {
+    id: string;
+    userId: string;
+    role: WorkspaceRole;
+    createdAt: string;
+    user: {
+        id: string;
+        email: string;
+        name: string;
+    };
+};
+
+
 // -- MAPPER -----------------------------------------------
+export function toWorkspaceMemberResponseDto(m: WorkspaceMember): WorkspaceMemberResponseDto {
+    return {
+        id: m.id,
+        userId: m.userId,
+        role: m.role,
+        createdAt: m.createdAt.toISOString(),
+        user: {
+            id: m.user.id,
+            email: m.user.email,
+            name: m.user.name,
+        },
+    };
+}
 
 export function toWorkspaceResponseDto(w: Workspace): WorkspaceResponseDto {
     return {

@@ -97,6 +97,7 @@ export const createApp = (dataSource: DataSource) => {
             workspaceController,
             requireAuth,
             requireWorkspaceMember,
+            requireWorkspaceAdmin,  
             requireWorkspaceOwner,
         ),
     );
