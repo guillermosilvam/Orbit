@@ -1,5 +1,5 @@
 {
   "name": "orbit",
   "private": true,
-  "workspaces": ["api", "shared"]
+  "workspaces": ["api", "shared", "web"]
 }
