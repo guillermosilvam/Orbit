@@ -1,18 +1,17 @@
 import { RouterProvider } from "@tanstack/react-router";
 import { router } from "./app/router";
-import { useMe } from "./features/auth/hooks/use-me";
+import { useQueryClient } from "@tanstack/react-query";
 
 
 export default function App() {
-  const me = useMe();
+  const queryClient = useQueryClient();
 
   return (
     <RouterProvider
       router={router}
       context={{
-        auth: {
-          user: me.data ?? null,
-        },
+        queryClient,
+        auth: { user: null }
       }}
     />
   );

@@ -9,6 +9,7 @@ import { Field } from "../../../shared/ui/Field";
 import { Input } from "../../../shared/ui/Input";
 import { useRegister } from "../hooks/use-register";
 import { ApiError } from "../../../shared/lib/api-client";
+import { useNavigate } from "@tanstack/react-router";
 
 
 export function RegisterForm() {
@@ -18,9 +19,11 @@ export function RegisterForm() {
   });
 
   const register = useRegister();
+  const navigate = useNavigate();
 
-  const onSubmit = form.handleSubmit((data) => {
-    register.mutate(data);
+  const onSubmit = form.handleSubmit(async (data) => {
+    await register.mutateAsync(data);
+    navigate({ to: "/" })
   });
 
   const serverError =

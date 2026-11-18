@@ -9,18 +9,9 @@ import { Field } from "../../../shared/ui/Field";
 import { Input } from "../../../shared/ui/Input";
 import { useLogin } from "../hooks/use-login";
 import { ApiError } from "../../../shared/lib/api-client";
+import { useNavigate } from "@tanstack/react-router";
 
-/**
- * Form de login. Usa React Hook Form + Zod:
- *
- * - `useForm` crea el controlador del form. Es el estado del form.
- * - `zodResolver(loginSchema)` conecta el schema compartido con RHF.
- *   La validación corre en cliente, con el mismo schema que el backend.
- * - `register("email")` conecta un `<input>` con el estado del form.
- *   No hay `useState` por campo. RHF usa refs y no re-renderiza por keystroke.
- * - `handleSubmit(onSubmit)` valida el form y, si pasa, llama a `onSubmit`.
- *   Si falla, llena `formState.errors` sin llamar a `onSubmit`.
- */
+
 export function LoginForm() {
   const form = useForm<LoginInputDto>({
     resolver: zodResolver(loginSchema),
@@ -28,9 +19,11 @@ export function LoginForm() {
   });
 
   const login = useLogin();
+  const navigate = useNavigate()
 
-  const onSubmit = form.handleSubmit((data) => {
-    login.mutate(data);
+  const onSubmit = form.handleSubmit(async (data) => {
+    await login.mutateAsync(data);
+    navigate({ to: "/" })
   });
 
   const serverError =
