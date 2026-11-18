@@ -1,55 +1,67 @@
-import { Plus, Trash2 } from "lucide-react";
+import { useState } from "react";
 import { Button } from "./shared/ui/Button";
+import { Field } from "./shared/ui/Field";
+import { Input } from "./shared/ui/Input";
 
+export default function App() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [submitted, setSubmitted] = useState(false);
 
-function App() {
+  const emailError =
+    submitted && !email.includes("@") ? "Enter a valid email" : undefined;
+  const passwordError =
+    submitted && password.length < 8 ? "At least 8 characters" : undefined;
+
   return (
-     <main className="min-h-screen bg-dots p-8">
-      <div className="max-w-2xl mx-auto flex flex-col gap-px border border-border bg-border">
-        <div className="bg-surface p-6 flex flex-col gap-4">
-          <h1 className="text-xl font-semibold text-text-primary">Button variants</h1>
+    <main className="min-h-screen bg-dots p-8">
+      <div className="max-w-md mx-auto border border-border bg-card p-6">
+        <h1 className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-4">
+          Sign in
+        </h1>
 
-          {/* Fila de variantes, tamaño md (default) */}
-          <div className="flex flex-wrap gap-2">
-            <Button>Primary</Button>
-            <Button variant="secondary">Secondary</Button>
-            <Button variant="ghost">Ghost</Button>
-            <Button variant="destructive">Danger</Button>
-          </div>
+        <form
+          className="flex flex-col gap-4"
+          onSubmit={(e) => {
+            e.preventDefault();
+            setSubmitted(true);
+          }}
+        >
+          <Field label="Email" error={emailError} required>
+            <Input
+              type="email"
+              placeholder="you@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
+          </Field>
 
-          {/* Tamaños */}
-          <div className="flex flex-wrap gap-2 items-center">
-            <Button size="sm">Small</Button>
-            <Button size="md">Medium</Button>
-            <Button size="lg">Large</Button>
-          </div>
+          <Field label="Password" error={passwordError} required>
+            <Input
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
+          </Field>
 
-          {/* Con iconos (Lucide) */}
-          <div className="flex flex-wrap gap-2">
-            <Button>
-              <Plus className="size-4" /> New task
-            </Button>
-            <Button variant="destructive">
-              <Trash2 className="size-4" /> Delete
-            </Button>
-          </div>
+          <Button type="submit">Sign in</Button>
+        </form>
 
-          {/* Estados */}
-          <div className="flex flex-wrap gap-2">
-            <Button disabled>Disabled</Button>
-            <Button loading>Loading</Button>
-          </div>
-
-          {/* Override de clases por el consumidor */}
-          <div className="flex flex-wrap gap-2">
-            <Button className="bg-status-done border-status-done">
-              Overridden to green
-            </Button>
-          </div>
+        <div className="mt-6 flex flex-col gap-2">
+          <Field label="Disabled input">
+            <Input disabled placeholder="Can't touch this" />
+          </Field>
         </div>
       </div>
+
+      <button
+        type="button"
+        className="fixed bottom-4 right-4 bg-primary text-primary-foreground px-4 py-2 font-mono text-xs uppercase tracking-wider"
+        onClick={() => document.documentElement.classList.toggle("dark")}
+      >
+        toggle theme
+      </button>
     </main>
   );
 }
-
-export default App;
