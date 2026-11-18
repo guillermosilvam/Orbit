@@ -1,16 +1,11 @@
-@import "geist/dist/fonts/geist-sans/style.css";
-@import "geist/dist/fonts/geist-mono/style.css";
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
 @import "tailwindcss";
 
-@theme {
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, monospace;
-}
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  /* shadcn core */
   --background: #f7f4ec;
   --foreground: #1c1b18;
   --card: #fcfaf5;
@@ -70,8 +65,8 @@
 
 
 @theme inline {
-  --font-sans: "Geist", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "Geist Mono", ui-monospace, "SF Mono", monospace;
+  --font-sans: "Geist Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "Geist Mono Variable", ui-monospace, "SF Mono", monospace;
 
   --color-background: var(--background);
   --color-foreground: var(--foreground);
