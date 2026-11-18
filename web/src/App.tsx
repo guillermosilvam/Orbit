@@ -2,57 +2,77 @@ import { useState } from "react";
 import { Button } from "./shared/ui/Button";
 import { Field } from "./shared/ui/Field";
 import { Input } from "./shared/ui/Input";
+import { useLogin } from "./features/auth/hooks/use-login";
+import { useMe } from "./features/auth/hooks/use-me";
+import { ApiError } from "./shared/lib/api-client";
 
 export default function App() {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [submitted, setSubmitted] = useState(false);
+  const [email, setEmail] = useState("test@x.com");
+  const [password, setPassword] = useState("password123");
 
-  const emailError =
-    submitted && !email.includes("@") ? "Enter a valid email" : undefined;
-  const passwordError =
-    submitted && password.length < 8 ? "At least 8 characters" : undefined;
+  const me = useMe();
+  const login = useLogin();
+
+  const errorMessage =
+    login.error instanceof ApiError ? login.error.message : login.error?.message;
 
   return (
     <main className="min-h-screen bg-dots p-8">
-      <div className="max-w-md mx-auto border border-border bg-card p-6">
-        <h1 className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-4">
-          Sign in
-        </h1>
+      <div className="max-w-md mx-auto border border-border bg-card p-6 flex flex-col gap-6">
+        {/* Estado de sesión actual */}
+        <div className="border-b border-border pb-4">
+          <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground mb-2">
+            Session
+          </p>
+          {me.isLoading && <p className="text-sm text-muted-foreground">Loading…</p>}
+          {!me.isLoading && me.data === null && (
+            <p className="text-sm text-muted-foreground">Not signed in</p>
+          )}
+          {me.data && (
+            <p className="text-sm text-foreground">
+              Signed in as <strong>{me.data.email}</strong>
+            </p>
+          )}
+        </div>
 
+        {/* Form de login */}
         <form
           className="flex flex-col gap-4"
           onSubmit={(e) => {
             e.preventDefault();
-            setSubmitted(true);
+            login.mutate(
+              { email, password },
+              {
+                onSuccess: (data) => {
+                  console.log("Login OK:", data.user.email);
+                },
+                onError: (err) => {
+                  console.warn("Login failed:", err.message);
+                },
+              },
+            );
           }}
         >
-          <Field label="Email" error={emailError} required>
+          <Field label="Email" required>
             <Input
               type="email"
-              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
             />
           </Field>
 
-          <Field label="Password" error={passwordError} required>
+          <Field label="Password" error={errorMessage} required>
             <Input
               type="password"
-              placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
             />
           </Field>
 
-          <Button type="submit">Sign in</Button>
+          <Button type="submit" loading={login.isPending}>
+            {login.isPending ? "Signing in…" : "Sign in"}
+          </Button>
         </form>
-
-        <div className="mt-6 flex flex-col gap-2">
-          <Field label="Disabled input">
-            <Input disabled placeholder="Can't touch this" />
-          </Field>
-        </div>
       </div>
 
       <button
