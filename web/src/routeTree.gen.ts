@@ -13,6 +13,7 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedWorkspacesWorkspaceSlugRouteImport } from './routes/_authenticated/workspaces.$workspaceSlug'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -33,16 +34,24 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedWorkspacesWorkspaceSlugRoute =
+  AuthenticatedWorkspacesWorkspaceSlugRouteImport.update({
+    id: '/workspaces/$workspaceSlug',
+    path: '/workspaces/$workspaceSlug',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/workspaces/$workspaceSlug': typeof AuthenticatedWorkspacesWorkspaceSlugRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/': typeof AuthenticatedIndexRoute
+  '/workspaces/$workspaceSlug': typeof AuthenticatedWorkspacesWorkspaceSlugRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -50,14 +59,20 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/workspaces/$workspaceSlug': typeof AuthenticatedWorkspacesWorkspaceSlugRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register'
+  fullPaths: '/' | '/login' | '/register' | '/workspaces/$workspaceSlug'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/'
+  to: '/login' | '/register' | '/' | '/workspaces/$workspaceSlug'
   id:
-    '__root__' | '/_authenticated' | '/login' | '/register' | '/_authenticated/'
+    | '__root__'
+    | '/_authenticated'
+    | '/login'
+    | '/register'
+    | '/_authenticated/'
+    | '/_authenticated/workspaces/$workspaceSlug'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -96,15 +111,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/workspaces/$workspaceSlug': {
+      id: '/_authenticated/workspaces/$workspaceSlug'
+      path: '/workspaces/$workspaceSlug'
+      fullPath: '/workspaces/$workspaceSlug'
+      preLoaderRoute: typeof AuthenticatedWorkspacesWorkspaceSlugRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedWorkspacesWorkspaceSlugRoute: typeof AuthenticatedWorkspacesWorkspaceSlugRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedWorkspacesWorkspaceSlugRoute:
+    AuthenticatedWorkspacesWorkspaceSlugRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
