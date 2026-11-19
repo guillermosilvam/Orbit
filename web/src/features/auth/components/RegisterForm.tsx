@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearch, useNavigate } from "@tanstack/react-router";
 import {
   registerSchema,
   type RegisterInputDto,
@@ -9,21 +10,23 @@ import { Field } from "../../../shared/ui/Field";
 import { Input } from "../../../shared/ui/Input";
 import { useRegister } from "../hooks/use-register";
 import { ApiError } from "../../../shared/lib/api-client";
-import { useNavigate } from "@tanstack/react-router";
-
 
 export function RegisterForm() {
   const form = useForm<RegisterInputDto>({
     resolver: zodResolver(registerSchema),
     defaultValues: { name: "", email: "", password: "" },
   });
-
   const register = useRegister();
   const navigate = useNavigate();
+  const { redirect: redirectTo } = useSearch({ from: "/register" });
 
   const onSubmit = form.handleSubmit(async (data) => {
     await register.mutateAsync(data);
-    navigate({ to: "/" })
+    if (redirectTo) {
+      window.location.href = redirectTo;
+    } else {
+      navigate({ to: "/" });
+    }
   });
 
   const serverError =
@@ -33,20 +36,28 @@ export function RegisterForm() {
 
   return (
     <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
-      <Field label="Nombre" error={form.formState.errors.name?.message} required>
+      <Field
+        label="Nombre"
+        error={form.formState.errors.name?.message}
+        required
+      >
         <Input
           type="text"
           autoComplete="name"
-          placeholder="Juan Perez"
+          placeholder="Ada Lovelace"
           {...form.register("name")}
         />
       </Field>
 
-      <Field label="Email" error={form.formState.errors.email?.message} required>
+      <Field
+        label="Email"
+        error={form.formState.errors.email?.message}
+        required
+      >
         <Input
           type="email"
           autoComplete="email"
-          placeholder="usuario@ejemplo.com"
+          placeholder="tu@ejemplo.com"
           {...form.register("email")}
         />
       </Field>

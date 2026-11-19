@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
-import { Plus, Users } from "lucide-react";
+import { Plus, Users, UserPlus } from "lucide-react";
 import { useWorkspaces } from "../hooks/use-workspaces";
 import { useProjects } from "../../projects/hooks/use-projects";
 import { CreateProjectDialog } from "../../projects/components/CreateProjectDialog";
@@ -25,7 +25,7 @@ export function AppSidebar() {
   const { data: projects = [] } = useProjects(currentSlug);
   const [createOpen, setCreateOpen] = useState(false);
 
-  const canCreate =
+  const canManage =
     current && (current.role === "owner" || current.role === "admin");
 
   return (
@@ -80,7 +80,7 @@ export function AppSidebar() {
                   <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                     Proyectos
                   </p>
-                  {canCreate && (
+                  {canManage && (
                     <button
                       type="button"
                       onClick={() => setCreateOpen(true)}
@@ -124,15 +124,32 @@ export function AppSidebar() {
                 <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
                   Workspace
                 </p>
-                <Link
-                  to="/workspaces/$workspaceSlug/members"
-                  params={{ workspaceSlug: current.slug }}
-                  className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                  activeProps={{ className: "bg-accent text-foreground" }}
-                >
-                  <Users className="size-3.5" />
-                  <span>Miembros</span>
-                </Link>
+                <ul className="space-y-0.5">
+                  <li>
+                    <Link
+                      to="/workspaces/$workspaceSlug/members"
+                      params={{ workspaceSlug: current.slug }}
+                      className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                      activeProps={{ className: "bg-accent text-foreground" }}
+                    >
+                      <Users className="size-3.5" />
+                      <span>Miembros</span>
+                    </Link>
+                  </li>
+                  {canManage && (
+                    <li>
+                      <Link
+                        to="/workspaces/$workspaceSlug/invitations"
+                        params={{ workspaceSlug: current.slug }}
+                        className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                        activeProps={{ className: "bg-accent text-foreground" }}
+                      >
+                        <UserPlus className="size-3.5" />
+                        <span>Invitaciones</span>
+                      </Link>
+                    </li>
+                  )}
+                </ul>
               </div>
             </>
           ) : (

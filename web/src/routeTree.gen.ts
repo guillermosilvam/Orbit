@@ -13,7 +13,9 @@ import { Route as AuthenticatedRouteImport } from './routes/_authenticated'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
+import { Route as AuthenticatedInvitationsTokenRouteImport } from './routes/_authenticated/invitations.$token'
 import { Route as AuthenticatedWorkspacesWorkspaceSlugRouteImport } from './routes/_authenticated/workspaces.$workspaceSlug'
+import { Route as AuthenticatedWorkspacesWorkspaceSlugInvitationsRouteImport } from './routes/_authenticated/workspaces.$workspaceSlug_.invitations'
 import { Route as AuthenticatedWorkspacesWorkspaceSlugMembersRouteImport } from './routes/_authenticated/workspaces.$workspaceSlug_.members'
 import { Route as AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRouteImport } from './routes/_authenticated/workspaces.$workspaceSlug_.projects.$projectKey'
 
@@ -36,10 +38,22 @@ const AuthenticatedIndexRoute = AuthenticatedIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AuthenticatedRoute,
 } as any)
+const AuthenticatedInvitationsTokenRoute =
+  AuthenticatedInvitationsTokenRouteImport.update({
+    id: '/invitations/$token',
+    path: '/invitations/$token',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 const AuthenticatedWorkspacesWorkspaceSlugRoute =
   AuthenticatedWorkspacesWorkspaceSlugRouteImport.update({
     id: '/workspaces/$workspaceSlug',
     path: '/workspaces/$workspaceSlug',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
+const AuthenticatedWorkspacesWorkspaceSlugInvitationsRoute =
+  AuthenticatedWorkspacesWorkspaceSlugInvitationsRouteImport.update({
+    id: '/workspaces/$workspaceSlug_/invitations',
+    path: '/workspaces/$workspaceSlug/invitations',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
 const AuthenticatedWorkspacesWorkspaceSlugMembersRoute =
@@ -59,7 +73,9 @@ export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
+  '/invitations/$token': typeof AuthenticatedInvitationsTokenRoute
   '/workspaces/$workspaceSlug': typeof AuthenticatedWorkspacesWorkspaceSlugRoute
+  '/workspaces/$workspaceSlug/invitations': typeof AuthenticatedWorkspacesWorkspaceSlugInvitationsRoute
   '/workspaces/$workspaceSlug/members': typeof AuthenticatedWorkspacesWorkspaceSlugMembersRoute
   '/workspaces/$workspaceSlug/projects/$projectKey': typeof AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute
 }
@@ -67,7 +83,9 @@ export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/': typeof AuthenticatedIndexRoute
+  '/invitations/$token': typeof AuthenticatedInvitationsTokenRoute
   '/workspaces/$workspaceSlug': typeof AuthenticatedWorkspacesWorkspaceSlugRoute
+  '/workspaces/$workspaceSlug/invitations': typeof AuthenticatedWorkspacesWorkspaceSlugInvitationsRoute
   '/workspaces/$workspaceSlug/members': typeof AuthenticatedWorkspacesWorkspaceSlugMembersRoute
   '/workspaces/$workspaceSlug/projects/$projectKey': typeof AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute
 }
@@ -77,7 +95,9 @@ export interface FileRoutesById {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
+  '/_authenticated/invitations/$token': typeof AuthenticatedInvitationsTokenRoute
   '/_authenticated/workspaces/$workspaceSlug': typeof AuthenticatedWorkspacesWorkspaceSlugRoute
+  '/_authenticated/workspaces/$workspaceSlug_/invitations': typeof AuthenticatedWorkspacesWorkspaceSlugInvitationsRoute
   '/_authenticated/workspaces/$workspaceSlug_/members': typeof AuthenticatedWorkspacesWorkspaceSlugMembersRoute
   '/_authenticated/workspaces/$workspaceSlug_/projects/$projectKey': typeof AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute
 }
@@ -87,7 +107,9 @@ export interface FileRouteTypes {
     | '/'
     | '/login'
     | '/register'
+    | '/invitations/$token'
     | '/workspaces/$workspaceSlug'
+    | '/workspaces/$workspaceSlug/invitations'
     | '/workspaces/$workspaceSlug/members'
     | '/workspaces/$workspaceSlug/projects/$projectKey'
   fileRoutesByTo: FileRoutesByTo
@@ -95,7 +117,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/'
+    | '/invitations/$token'
     | '/workspaces/$workspaceSlug'
+    | '/workspaces/$workspaceSlug/invitations'
     | '/workspaces/$workspaceSlug/members'
     | '/workspaces/$workspaceSlug/projects/$projectKey'
   id:
@@ -104,7 +128,9 @@ export interface FileRouteTypes {
     | '/login'
     | '/register'
     | '/_authenticated/'
+    | '/_authenticated/invitations/$token'
     | '/_authenticated/workspaces/$workspaceSlug'
+    | '/_authenticated/workspaces/$workspaceSlug_/invitations'
     | '/_authenticated/workspaces/$workspaceSlug_/members'
     | '/_authenticated/workspaces/$workspaceSlug_/projects/$projectKey'
   fileRoutesById: FileRoutesById
@@ -145,11 +171,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedIndexRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/invitations/$token': {
+      id: '/_authenticated/invitations/$token'
+      path: '/invitations/$token'
+      fullPath: '/invitations/$token'
+      preLoaderRoute: typeof AuthenticatedInvitationsTokenRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
     '/_authenticated/workspaces/$workspaceSlug': {
       id: '/_authenticated/workspaces/$workspaceSlug'
       path: '/workspaces/$workspaceSlug'
       fullPath: '/workspaces/$workspaceSlug'
       preLoaderRoute: typeof AuthenticatedWorkspacesWorkspaceSlugRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
+    '/_authenticated/workspaces/$workspaceSlug_/invitations': {
+      id: '/_authenticated/workspaces/$workspaceSlug_/invitations'
+      path: '/workspaces/$workspaceSlug/invitations'
+      fullPath: '/workspaces/$workspaceSlug/invitations'
+      preLoaderRoute: typeof AuthenticatedWorkspacesWorkspaceSlugInvitationsRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
     '/_authenticated/workspaces/$workspaceSlug_/members': {
@@ -171,15 +211,20 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
+  AuthenticatedInvitationsTokenRoute: typeof AuthenticatedInvitationsTokenRoute
   AuthenticatedWorkspacesWorkspaceSlugRoute: typeof AuthenticatedWorkspacesWorkspaceSlugRoute
+  AuthenticatedWorkspacesWorkspaceSlugInvitationsRoute: typeof AuthenticatedWorkspacesWorkspaceSlugInvitationsRoute
   AuthenticatedWorkspacesWorkspaceSlugMembersRoute: typeof AuthenticatedWorkspacesWorkspaceSlugMembersRoute
   AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute: typeof AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
+  AuthenticatedInvitationsTokenRoute: AuthenticatedInvitationsTokenRoute,
   AuthenticatedWorkspacesWorkspaceSlugRoute:
     AuthenticatedWorkspacesWorkspaceSlugRoute,
+  AuthenticatedWorkspacesWorkspaceSlugInvitationsRoute:
+    AuthenticatedWorkspacesWorkspaceSlugInvitationsRoute,
   AuthenticatedWorkspacesWorkspaceSlugMembersRoute:
     AuthenticatedWorkspacesWorkspaceSlugMembersRoute,
   AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute:

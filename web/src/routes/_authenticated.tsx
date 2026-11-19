@@ -6,7 +6,10 @@ export const Route = createFileRoute("/_authenticated")({
   beforeLoad: async ({ context, location }) => {
     const user = await context.queryClient.query(meQueryOptions);
     if (!user) {
-      throw redirect({ to: "/login", search: { redirect: location.href } });
+      throw redirect({
+        to: "/login",
+        search: { redirect: location.pathname + location.search },
+      });
     }
     return { auth: { user } };
   },

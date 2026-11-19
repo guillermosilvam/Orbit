@@ -1,14 +1,15 @@
+import { Link, useSearch } from "@tanstack/react-router";
 import { OrbitalCanvas } from "../components/OrbitalCanvas";
 import { LoginForm } from "../components/LoginForm";
-import { Link } from "@tanstack/react-router";
 
 export function LoginPage() {
+  const { redirect } = useSearch({ from: "/login" });
+
   return (
     <main className="min-h-screen bg-dots flex items-center justify-center p-4">
       <div className="w-full max-w-5xl border border-border bg-card grid grid-cols-1 lg:grid-cols-12">
         <div className="hidden lg:flex lg:col-span-7 flex-col justify-between p-8 border-r border-border min-h-150">
           <OrbitalCanvas />
-
           <div className="border-t border-border pt-6">
             <h1 className="text-3xl font-semibold tracking-tight text-foreground">
               Mantén cada proyecto en órbita.
@@ -19,9 +20,7 @@ export function LoginPage() {
           </div>
         </div>
 
-        {/* ── Panel derecho: form ── */}
         <div className="lg:col-span-5 flex flex-col justify-between p-8 min-h-150">
-          {/* Header con logo */}
           <div>
             <div className="flex items-center gap-2 border-b border-border pb-4 mb-8">
               <svg
@@ -63,11 +62,11 @@ export function LoginPage() {
             <LoginForm />
           </div>
 
-          {/* Footer */}
           <div className="border-t border-border pt-4 mt-8 flex items-center justify-between text-xs text-muted-foreground">
             <span>¿No tienes cuenta?</span>
             <Link
               to="/register"
+              search={{ redirect }}
               className="text-primary hover:underline font-medium"
             >
               Crear una

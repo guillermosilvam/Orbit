@@ -1,5 +1,6 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useSearch, useNavigate } from "@tanstack/react-router";
 import {
   loginSchema,
   type LoginInputDto,
@@ -9,21 +10,23 @@ import { Field } from "../../../shared/ui/Field";
 import { Input } from "../../../shared/ui/Input";
 import { useLogin } from "../hooks/use-login";
 import { ApiError } from "../../../shared/lib/api-client";
-import { useNavigate } from "@tanstack/react-router";
-
 
 export function LoginForm() {
   const form = useForm<LoginInputDto>({
     resolver: zodResolver(loginSchema),
     defaultValues: { email: "", password: "" },
   });
-
   const login = useLogin();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
+  const { redirect: redirectTo } = useSearch({ from: "/login" });
 
   const onSubmit = form.handleSubmit(async (data) => {
     await login.mutateAsync(data);
-    navigate({ to: "/" })
+    if (redirectTo) {
+      window.location.href = redirectTo;
+    } else {
+      navigate({ to: "/" });
+    }
   });
 
   const serverError =
@@ -41,13 +44,13 @@ export function LoginForm() {
         <Input
           type="email"
           autoComplete="email"
-          placeholder="usuario@ejemplo.com"
+          placeholder="tu@ejemplo.com"
           {...form.register("email")}
         />
       </Field>
 
       <Field
-        label="Password"
+        label="Contraseña"
         error={form.formState.errors.password?.message}
         required
       >
