@@ -11,13 +11,7 @@ const STATUS_SECTION: Record<TaskStatus, string> = {
   done: "Hechas",
 };
 
-/**
- * Lista agrupada por estado. Cada grupo tiene su contador y sus tareas
- * ordenadas por `position` (que el backend mantiene al crear).
- *
- * Si una tarea tiene `identifier` (WEB-12), se muestra en mono a la
- * izquierda: es el "nombre corto" referenciable.
- */
+
 export function TaskList({
   tasks,
   workspaceSlug,

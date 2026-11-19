@@ -4,6 +4,7 @@ import { useProject } from "../../features/tasks/hooks/use-project";
 import { useTasks } from "../../features/tasks/hooks/use-tasks";
 import { TaskList } from "../../features/tasks/components/TaskList";
 import { CreateTaskDialog } from "../../features/tasks/components/CreateTaskDialog";
+import { KanbanBoard } from "../../features/tasks/components/KanbanBoard";
 import { Button } from "../../shared/ui/Button";
 
 export const Route = createFileRoute(
@@ -87,12 +88,12 @@ function ProjectDetailPage() {
         </>
       )}
 
-      {tab === "board" && (
-        <div className="border border-border bg-card p-12 text-center">
-          <p className="text-sm text-muted-foreground">
-            El tablero kanban llega en el siguiente paso.
-          </p>
-        </div>
+      {tab === "board" && tasks.data &&(
+        <KanbanBoard
+          tasks={tasks.data}
+          workspaceSlug={workspaceSlug}
+          projectKey={projectKey}
+        />
       )}
 
       <CreateTaskDialog
