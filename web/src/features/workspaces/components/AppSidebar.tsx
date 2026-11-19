@@ -1,4 +1,4 @@
-import { useMatchRoute } from "@tanstack/react-router";
+import { Link, useMatchRoute } from "@tanstack/react-router";
 import { useWorkspaces } from "../hooks/use-workspaces";
 
 export function AppSidebar() {
@@ -13,30 +13,34 @@ export function AppSidebar() {
   return (
     <aside className="w-60 bg-sidebar border-r border-border flex flex-col shrink-0">
       <div className="p-4 border-b border-border">
-        <div className="flex items-center gap-2">
-          <svg
-            className="text-primary"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2"
+            aria-label="Ir al inicio"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="9"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeDasharray="2 2"
-            />
-            <circle cx="12" cy="12" r="3.5" fill="currentColor" />
-            <circle cx="19" cy="8" r="1.5" fill="var(--status-in-progress)" />
-          </svg>
-          <span className="text-lg font-semibold tracking-tight text-foreground">
-            Orbit
-          </span>
-        </div>
+            <svg
+              className="text-primary"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeDasharray="2 2"
+              />
+              <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+              <circle cx="19" cy="8" r="1.5" fill="var(--status-in-progress)" />
+            </svg>
+            <span className="text-lg font-semibold tracking-tight text-foreground">
+              Orbit
+            </span>
+          </Link>
       </div>
 
       <div className="p-4 flex-1 overflow-auto">
