@@ -8,13 +8,14 @@ import type { TaskStatus } from "@orbit/shared/schemas/task.schema";
 import { KanbanCard } from "./KanbanCard";
 import { TaskStatusBadge } from "./TaskStatusBadge";
 
-
 export function KanbanColumn({
   status,
   tasks,
+  onSelectTask,
 }: {
   status: TaskStatus;
   tasks: TaskResponseDto[];
+  onSelectTask: (task: TaskResponseDto) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -38,7 +39,11 @@ export function KanbanColumn({
           strategy={verticalListSortingStrategy}
         >
           {tasks.map((task) => (
-            <KanbanCard key={task.id} task={task} />
+            <KanbanCard
+              key={task.id}
+              task={task}
+              onClick={() => onSelectTask(task)}
+            />
           ))}
         </SortableContext>
 

@@ -38,4 +38,10 @@ export const tasksApi = {
             `/workspaces/${workspaceSlug}/projects/${projectKey}/tasks/${number}`,
             { method: "PATCH", body: input },
         ),
+
+    delete: (workspaceSlug: string, projectKey: string, number: number) =>
+        apiClient<null>(
+            `/workspaces/${workspaceSlug}/projects/${projectKey}/tasks/${number}`,
+            { method: "DELETE" },
+        ),
 };

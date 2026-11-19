@@ -24,10 +24,12 @@ export function KanbanBoard({
   tasks,
   workspaceSlug,
   projectKey,
+  onSelectTask,
 }: {
   tasks: TaskResponseDto[];
   workspaceSlug: string;
   projectKey: string;
+  onSelectTask: (task: TaskResponseDto) => void;
 }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const updateTask = useUpdateTask(workspaceSlug, projectKey);
@@ -104,6 +106,7 @@ export function KanbanBoard({
             tasks={tasks
               .filter((t) => t.status === status)
               .sort((a, b) => a.position - b.position)}
+            onSelectTask={onSelectTask}
           />
         ))}
       </div>

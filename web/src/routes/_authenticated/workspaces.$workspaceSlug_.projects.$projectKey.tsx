@@ -1,10 +1,12 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
+import type { TaskResponseDto } from "@orbit/shared/types/responses";
 import { useProject } from "../../features/tasks/hooks/use-project";
 import { useTasks } from "../../features/tasks/hooks/use-tasks";
 import { TaskList } from "../../features/tasks/components/TaskList";
-import { CreateTaskDialog } from "../../features/tasks/components/CreateTaskDialog";
 import { KanbanBoard } from "../../features/tasks/components/KanbanBoard";
+import { CreateTaskDialog } from "../../features/tasks/components/CreateTaskDialog";
+import { TaskDetailDrawer } from "../../features/tasks/components/TaskDetailDrawer";
 import { Button } from "../../shared/ui/Button";
 
 export const Route = createFileRoute(
@@ -21,6 +23,9 @@ function ProjectDetailPage() {
   const tasks = useTasks(workspaceSlug, projectKey);
   const [createOpen, setCreateOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("list");
+  const [selectedTask, setSelectedTask] = useState<TaskResponseDto | null>(
+    null,
+  );
 
   if (project.isLoading) {
     return (
@@ -83,22 +88,30 @@ function ProjectDetailPage() {
               tasks={tasks.data}
               workspaceSlug={workspaceSlug}
               projectKey={projectKey}
+              onSelectTask={setSelectedTask}
             />
           )}
         </>
       )}
 
-      {tab === "board" && tasks.data &&(
+      {tab === "board" && tasks.data && (
         <KanbanBoard
           tasks={tasks.data}
           workspaceSlug={workspaceSlug}
           projectKey={projectKey}
+          onSelectTask={setSelectedTask}
         />
       )}
 
       <CreateTaskDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
+        workspaceSlug={workspaceSlug}
+        projectKey={projectKey}
+      />
+      <TaskDetailDrawer
+        task={selectedTask}
+        onClose={() => setSelectedTask(null)}
         workspaceSlug={workspaceSlug}
         projectKey={projectKey}
       />

@@ -7,25 +7,27 @@ import { TaskPriorityBadge } from "./TaskPriorityBadge";
 export function KanbanCard({
   task,
   isOverlay = false,
+  onClick,
 }: {
   task: TaskResponseDto;
   isOverlay?: boolean;
+  onClick?: () => void;
 }) {
   if (isOverlay) {
     return <CardBody task={task} />;
   }
-  return <SortableCard task={task} />;
+  return <SortableCard task={task} onClick={onClick} />;
 }
 
-function SortableCard({ task }: { task: TaskResponseDto }) {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging,
-  } = useSortable({ id: task.id });
+function SortableCard({
+  task,
+  onClick,
+}: {
+  task: TaskResponseDto;
+  onClick?: () => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: task.id });
 
   return (
     <div
@@ -37,6 +39,7 @@ function SortableCard({ task }: { task: TaskResponseDto }) {
       }}
       {...attributes}
       {...listeners}
+      onClick={onClick}
       className="cursor-grab active:cursor-grabbing touch-none"
     >
       <CardBody task={task} />

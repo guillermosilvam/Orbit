@@ -1,10 +1,18 @@
 import { useState } from "react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { Plus, Users } from "lucide-react";
 import { useWorkspaces } from "../hooks/use-workspaces";
 import { useProjects } from "../../projects/hooks/use-projects";
 import { CreateProjectDialog } from "../../projects/components/CreateProjectDialog";
 
+/**
+ * Sidebar (240px). Muestra:
+ * - Logo clickeable a "/".
+ * - Workspace actual (si hay).
+ * - Lista de proyectos con link a cada uno.
+ * - Link a "Miembros".
+ * - Botón "+" para crear proyecto (solo owner/admin).
+ */
 export function AppSidebar() {
   const { data: workspaces = [] } = useWorkspaces();
   const match = useMatchRoute();
@@ -19,103 +27,122 @@ export function AppSidebar() {
 
   const canCreate =
     current && (current.role === "owner" || current.role === "admin");
+
   return (
-    <aside className="w-60 bg-sidebar border-r border-border flex flex-col shrink-0">
-      <div className="p-4 border-b border-border">
-        <Link
-          to="/"
-          className="inline-flex items-center gap-2"
-          aria-label="Ir al inicio"
-        >
-          <svg
-            className="text-primary"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden
+    <>
+      <aside className="w-60 bg-sidebar border-r border-border flex flex-col shrink-0">
+        <div className="p-4 border-b border-border">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2"
+            aria-label="Ir al inicio"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="9"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeDasharray="2 2"
-            />
-            <circle cx="12" cy="12" r="3.5" fill="currentColor" />
-            <circle cx="19" cy="8" r="1.5" fill="var(--status-in-progress)" />
-          </svg>
-          <span className="text-lg font-semibold tracking-tight text-foreground">
-            Orbit
-          </span>
-        </Link>
-      </div>
+            <svg
+              className="text-primary"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeDasharray="2 2"
+              />
+              <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+              <circle cx="19" cy="8" r="1.5" fill="var(--status-in-progress)" />
+            </svg>
+            <span className="text-lg font-semibold tracking-tight text-foreground">
+              Orbit
+            </span>
+          </Link>
+        </div>
 
-      <div className="p-4 flex-1 overflow-auto">
-        {current ? (
-          <>
-            <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
-              Workspace
-            </p>
-            <p className="text-sm font-medium text-foreground truncate">
-              {current.name}
-            </p>
-            <p className="font-mono text-[11px] text-muted-foreground mt-0.5">
-              /{current.slug}
-            </p>
+        <div className="p-4 flex-1 overflow-auto">
+          {current ? (
+            <>
+              <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+                Workspace
+              </p>
+              <p className="text-sm font-medium text-foreground truncate">
+                {current.name}
+              </p>
+              <p className="font-mono text-[11px] text-muted-foreground mt-0.5">
+                /{current.slug}
+              </p>
 
-            <div className="mt-6">
-              <div className="flex items-center justify-between mb-2">
-                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                  Proyectos
-                </p>
-                {canCreate && (
-                  <button
-                    type="button"
-                    onClick={() => setCreateOpen(true)}
-                    className="text-muted-foreground hover:text-foreground transition-colors"
-                    aria-label="Crear proyecto"
-                  >
-                    <Plus className="size-3.5" />
-                  </button>
+              <div className="mt-6">
+                <div className="flex items-center justify-between mb-2">
+                  <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                    Proyectos
+                  </p>
+                  {canCreate && (
+                    <button
+                      type="button"
+                      onClick={() => setCreateOpen(true)}
+                      className="text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Crear proyecto"
+                    >
+                      <Plus className="size-3.5" />
+                    </button>
+                  )}
+                </div>
+
+                {projects.length === 0 ? (
+                  <p className="text-xs text-muted-foreground">Sin proyectos</p>
+                ) : (
+                  <ul className="space-y-0.5">
+                    {projects.map((p) => (
+                      <li key={p.id}>
+                        <Link
+                          to="/workspaces/$workspaceSlug/projects/$projectKey"
+                          params={{
+                            workspaceSlug: current.slug,
+                            projectKey: p.key,
+                          }}
+                          className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                          activeProps={{
+                            className: "bg-accent text-foreground",
+                          }}
+                        >
+                          <span className="font-mono text-[10px] text-muted-foreground">
+                            {p.key}
+                          </span>
+                          <span className="truncate">{p.name}</span>
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
                 )}
               </div>
 
-              {projects.length === 0 ? (
-                <p className="text-xs text-muted-foreground">Sin proyectos</p>
-              ) : (
-                <ul className="space-y-0.5">
-                  {projects.map((p) => (
-                    <li key={p.id}>
-                      <Link
-                        to="/workspaces/$workspaceSlug/projects/$projectKey"
-                        params={{
-                          workspaceSlug: current.slug,
-                          projectKey: p.key,
-                        }}
-                        className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                        activeProps={{
-                          className: "bg-accent text-foreground",
-                        }}
-                      >
-                        <span className="font-mono text-[10px] text-muted-foreground">
-                          {p.key}
-                        </span>
-                        <span className="truncate">{p.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              )}
-            </div>
-          </>
-        ) : (
-          <p className="text-xs text-muted-foreground">
-            Selecciona un workspace para ver su contenido.
-          </p>
-        )}
-      </div>
+              <div className="mt-6">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
+                  Workspace
+                </p>
+                <Link
+                  to="/workspaces/$workspaceSlug/members"
+                  params={{ workspaceSlug: current.slug }}
+                  className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                  activeProps={{ className: "bg-accent text-foreground" }}
+                >
+                  <Users className="size-3.5" />
+                  <span>Miembros</span>
+                </Link>
+              </div>
+            </>
+          ) : (
+            <p className="text-xs text-muted-foreground">
+              Selecciona un workspace para ver su contenido.
+            </p>
+          )}
+        </div>
+      </aside>
+
       {currentSlug && (
         <CreateProjectDialog
           open={createOpen}
@@ -123,6 +150,6 @@ export function AppSidebar() {
           workspaceSlug={currentSlug}
         />
       )}
-    </aside>
+    </>
   );
 }

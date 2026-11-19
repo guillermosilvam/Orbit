@@ -1,4 +1,3 @@
-import { Link } from "@tanstack/react-router";
 import type { TaskResponseDto } from "@orbit/shared/types/responses";
 import type { TaskStatus } from "@orbit/shared/schemas/task.schema";
 import { TaskStatusBadge } from "./TaskStatusBadge";
@@ -11,15 +10,16 @@ const STATUS_SECTION: Record<TaskStatus, string> = {
   done: "Hechas",
 };
 
-
 export function TaskList({
   tasks,
   workspaceSlug,
   projectKey,
+  onSelectTask,
 }: {
   tasks: TaskResponseDto[];
   workspaceSlug: string;
   projectKey: string;
+  onSelectTask: (task: TaskResponseDto) => void;
 }) {
   const grouped = STATUS_ORDER.map((status) => ({
     status,
@@ -59,8 +59,7 @@ export function TaskList({
                 <TaskRow
                   key={task.id}
                   task={task}
-                  workspaceSlug={workspaceSlug}
-                  projectKey={projectKey}
+                  onClick={() => onSelectTask(task)}
                 />
               ))}
             </div>
@@ -73,15 +72,17 @@ export function TaskList({
 
 function TaskRow({
   task,
-  // workspaceSlug,
-  // projectKey,
+  onClick,
 }: {
   task: TaskResponseDto;
-  workspaceSlug: string;
-  projectKey: string;
+  onClick: () => void;
 }) {
   return (
-    <div className="flex items-center gap-3 px-4 py-3 border-b border-border last:border-b-0 hover:bg-accent transition-colors cursor-pointer">
+    <button
+      type="button"
+      onClick={onClick}
+      className="w-full flex items-center gap-3 px-4 py-3 border-b border-border last:border-b-0 hover:bg-accent transition-colors text-left"
+    >
       <span className="font-mono text-[11px] text-muted-foreground tabular shrink-0 w-16">
         {task.identifier}
       </span>
@@ -89,6 +90,6 @@ function TaskRow({
         {task.title}
       </span>
       <TaskPriorityBadge priority={task.priority} />
-    </div>
+    </button>
   );
 }
