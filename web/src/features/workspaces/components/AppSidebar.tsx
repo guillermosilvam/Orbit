@@ -1,5 +1,9 @@
+import { useState } from "react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
 import { useWorkspaces } from "../hooks/use-workspaces";
+import { useProjects } from "../../projects/hooks/use-projects";
+import { CreateProjectDialog } from "../../projects/components/CreateProjectDialog";
 
 export function AppSidebar() {
   const { data: workspaces = [] } = useWorkspaces();
@@ -10,37 +14,42 @@ export function AppSidebar() {
     ? workspaces.find((w) => w.slug === currentSlug)
     : undefined;
 
+  const { data: projects = [] } = useProjects(currentSlug);
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const canCreate =
+    current && (current.role === "owner" || current.role === "admin");
   return (
     <aside className="w-60 bg-sidebar border-r border-border flex flex-col shrink-0">
       <div className="p-4 border-b border-border">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2"
-            aria-label="Ir al inicio"
+        <Link
+          to="/"
+          className="inline-flex items-center gap-2"
+          aria-label="Ir al inicio"
+        >
+          <svg
+            className="text-primary"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden
           >
-            <svg
-              className="text-primary"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="9"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeDasharray="2 2"
-              />
-              <circle cx="12" cy="12" r="3.5" fill="currentColor" />
-              <circle cx="19" cy="8" r="1.5" fill="var(--status-in-progress)" />
-            </svg>
-            <span className="text-lg font-semibold tracking-tight text-foreground">
-              Orbit
-            </span>
-          </Link>
+            <circle
+              cx="12"
+              cy="12"
+              r="9"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeDasharray="2 2"
+            />
+            <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+            <circle cx="19" cy="8" r="1.5" fill="var(--status-in-progress)" />
+          </svg>
+          <span className="text-lg font-semibold tracking-tight text-foreground">
+            Orbit
+          </span>
+        </Link>
       </div>
 
       <div className="p-4 flex-1 overflow-auto">
@@ -55,9 +64,51 @@ export function AppSidebar() {
             <p className="font-mono text-[11px] text-muted-foreground mt-0.5">
               /{current.slug}
             </p>
-            <p className="text-xs text-muted-foreground mt-6">
-              Proyectos — próximamente
-            </p>
+
+            <div className="mt-6">
+              <div className="flex items-center justify-between mb-2">
+                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Proyectos
+                </p>
+                {canCreate && (
+                  <button
+                    type="button"
+                    onClick={() => setCreateOpen(true)}
+                    className="text-muted-foreground hover:text-foreground transition-colors"
+                    aria-label="Crear proyecto"
+                  >
+                    <Plus className="size-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {projects.length === 0 ? (
+                <p className="text-xs text-muted-foreground">Sin proyectos</p>
+              ) : (
+                <ul className="space-y-0.5">
+                  {projects.map((p) => (
+                    <li key={p.id}>
+                      <Link
+                        to="/workspaces/$workspaceSlug/projects/$projectKey"
+                        params={{
+                          workspaceSlug: current.slug,
+                          projectKey: p.key,
+                        }}
+                        className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
+                        activeProps={{
+                          className: "bg-accent text-foreground",
+                        }}
+                      >
+                        <span className="font-mono text-[10px] text-muted-foreground">
+                          {p.key}
+                        </span>
+                        <span className="truncate">{p.name}</span>
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
           </>
         ) : (
           <p className="text-xs text-muted-foreground">
@@ -65,6 +116,13 @@ export function AppSidebar() {
           </p>
         )}
       </div>
+      {currentSlug && (
+        <CreateProjectDialog
+          open={createOpen}
+          onClose={() => setCreateOpen(false)}
+          workspaceSlug={currentSlug}
+        />
+      )}
     </aside>
   );
 }

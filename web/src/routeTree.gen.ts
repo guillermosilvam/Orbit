@@ -14,6 +14,7 @@ import { Route as LoginRouteImport } from './routes/login'
 import { Route as RegisterRouteImport } from './routes/register'
 import { Route as AuthenticatedIndexRouteImport } from './routes/_authenticated/index'
 import { Route as AuthenticatedWorkspacesWorkspaceSlugRouteImport } from './routes/_authenticated/workspaces.$workspaceSlug'
+import { Route as AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRouteImport } from './routes/_authenticated/workspaces.$workspaceSlug_.projects.$projectKey'
 
 const AuthenticatedRoute = AuthenticatedRouteImport.update({
   id: '/_authenticated',
@@ -40,18 +41,26 @@ const AuthenticatedWorkspacesWorkspaceSlugRoute =
     path: '/workspaces/$workspaceSlug',
     getParentRoute: () => AuthenticatedRoute,
   } as any)
+const AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute =
+  AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRouteImport.update({
+    id: '/workspaces/$workspaceSlug_/projects/$projectKey',
+    path: '/workspaces/$workspaceSlug/projects/$projectKey',
+    getParentRoute: () => AuthenticatedRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/workspaces/$workspaceSlug': typeof AuthenticatedWorkspacesWorkspaceSlugRoute
+  '/workspaces/$workspaceSlug/projects/$projectKey': typeof AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute
 }
 export interface FileRoutesByTo {
   '/login': typeof LoginRoute
   '/register': typeof RegisterRoute
   '/': typeof AuthenticatedIndexRoute
   '/workspaces/$workspaceSlug': typeof AuthenticatedWorkspacesWorkspaceSlugRoute
+  '/workspaces/$workspaceSlug/projects/$projectKey': typeof AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -60,12 +69,23 @@ export interface FileRoutesById {
   '/register': typeof RegisterRoute
   '/_authenticated/': typeof AuthenticatedIndexRoute
   '/_authenticated/workspaces/$workspaceSlug': typeof AuthenticatedWorkspacesWorkspaceSlugRoute
+  '/_authenticated/workspaces/$workspaceSlug_/projects/$projectKey': typeof AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/register' | '/workspaces/$workspaceSlug'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/register'
+    | '/workspaces/$workspaceSlug'
+    | '/workspaces/$workspaceSlug/projects/$projectKey'
   fileRoutesByTo: FileRoutesByTo
-  to: '/login' | '/register' | '/' | '/workspaces/$workspaceSlug'
+  to:
+    | '/login'
+    | '/register'
+    | '/'
+    | '/workspaces/$workspaceSlug'
+    | '/workspaces/$workspaceSlug/projects/$projectKey'
   id:
     | '__root__'
     | '/_authenticated'
@@ -73,6 +93,7 @@ export interface FileRouteTypes {
     | '/register'
     | '/_authenticated/'
     | '/_authenticated/workspaces/$workspaceSlug'
+    | '/_authenticated/workspaces/$workspaceSlug_/projects/$projectKey'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -118,18 +139,28 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedWorkspacesWorkspaceSlugRouteImport
       parentRoute: typeof AuthenticatedRoute
     }
+    '/_authenticated/workspaces/$workspaceSlug_/projects/$projectKey': {
+      id: '/_authenticated/workspaces/$workspaceSlug_/projects/$projectKey'
+      path: '/workspaces/$workspaceSlug/projects/$projectKey'
+      fullPath: '/workspaces/$workspaceSlug/projects/$projectKey'
+      preLoaderRoute: typeof AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRouteImport
+      parentRoute: typeof AuthenticatedRoute
+    }
   }
 }
 
 interface AuthenticatedRouteChildren {
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
   AuthenticatedWorkspacesWorkspaceSlugRoute: typeof AuthenticatedWorkspacesWorkspaceSlugRoute
+  AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute: typeof AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute
 }
 
 const AuthenticatedRouteChildren: AuthenticatedRouteChildren = {
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
   AuthenticatedWorkspacesWorkspaceSlugRoute:
     AuthenticatedWorkspacesWorkspaceSlugRoute,
+  AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute:
+    AuthenticatedWorkspacesWorkspaceSlugProjectsProjectKeyRoute,
 }
 
 const AuthenticatedRouteWithChildren = AuthenticatedRoute._addFileChildren(
