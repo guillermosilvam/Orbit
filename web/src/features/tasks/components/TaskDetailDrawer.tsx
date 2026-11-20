@@ -1,5 +1,6 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Controller, useForm, useWatch } from "react-hook-form";
+import { useQuery } from "@tanstack/react-query";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Trash2 } from "lucide-react";
 import {
@@ -25,6 +26,8 @@ import { useMembers } from "../../workspaces/hooks/use-members";
 import { TaskAssigneeAvatar } from "./TaskAssigneeAvatar";
 import { TaskDatePicker } from "./TaskDatePicker";
 import { SearchableSelect } from "./SearchableSelect";
+import { taskDetailQueryOptions } from "../api/tasks-queries";
+import { ConfirmDialog } from "../../../shared/ui/ConfirmDialog";
 
 const drawerFormSchema = updateTaskSchema.omit({ position: true });
 type DrawerFormData = z.infer<typeof drawerFormSchema>;
@@ -46,6 +49,13 @@ export function TaskDetailDrawer({
   const remove = useDeleteTask(workspaceSlug, projectKey);
   const membersQuery = useMembers(workspaceSlug);
   const members = membersQuery.data ?? [];
+  const taskDetailQuery = useQuery({
+    ...taskDetailQueryOptions(workspaceSlug, projectKey, task?.number ?? 0),
+    enabled: Boolean(task),
+  });
+  const taskData = taskDetailQuery.data ?? task;
+  const lastTaskId = useRef<string | null>(null);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
   const form = useForm<DrawerFormData>({
     resolver: zodResolver(drawerFormSchema),
@@ -63,19 +73,28 @@ export function TaskDetailDrawer({
     name: "status",
   });
   const { reset } = form;
+  const { isDirty } = form.formState;
 
   useEffect(() => {
-    if (task) {
+    if (!task) {
+      lastTaskId.current = null;
+      return;
+    }
+    const isNewTask = lastTaskId.current !== task.id;
+    if (isNewTask) {
+      lastTaskId.current = task.id;
+    }
+    if (taskData && (isNewTask || !isDirty)) {
       reset({
-        title: task.title,
-        description: task.description ?? "",
-        status: task.status,
-        priority: task.priority,
-        assigneeId: task.assigneeId,
-        dueDate: task.dueDate,
+        title: taskData.title,
+        description: taskData.description ?? "",
+        status: taskData.status,
+        priority: taskData.priority,
+        assigneeId: taskData.assigneeId,
+        dueDate: taskData.dueDate,
       });
     }
-  }, [reset, task]);
+  }, [isDirty, reset, task, taskData]);
 
   if (!task) return null;
 
@@ -93,16 +112,6 @@ export function TaskDetailDrawer({
       { onSuccess: () => onClose() },
     );
   });
-
-  const handleDelete = () => {
-    if (
-      !confirm(
-        `¿Eliminar ${task.identifier}? Esta acción no se puede deshacer.`,
-      )
-    )
-      return;
-    remove.mutate(task.number, { onSuccess: () => onClose() });
-  };
 
   const serverError =
     update.error instanceof ApiError
@@ -304,6 +313,12 @@ export function TaskDetailDrawer({
                 {serverError}
               </p>
             )}
+            {taskDetailQuery.isError && (
+              <p role="alert" className="mb-3 text-xs text-destructive">
+                No se pudo actualizar el detalle de la tarea; se muestran los datos de
+                la lista.
+              </p>
+            )}
           </div>
 
           {/* Footer */}
@@ -311,7 +326,7 @@ export function TaskDetailDrawer({
             <Button
               type="button"
               variant="ghost"
-              onClick={handleDelete}
+              onClick={() => setDeleteOpen(true)}
               loading={remove.isPending}
               className="text-destructive hover:bg-destructive/10"
             >
@@ -330,6 +345,17 @@ export function TaskDetailDrawer({
           </div>
         </form>
       </aside>
+      {deleteOpen && (
+        <ConfirmDialog
+          title={`Eliminar ${task.identifier}`}
+          description="La tarea se eliminará permanentemente de este proyecto."
+          confirmLabel="Eliminar tarea"
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={() =>
+            remove.mutate(task.number, { onSuccess: () => onClose() })
+          }
+        />
+      )}
     </>
   );
 }

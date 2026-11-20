@@ -52,7 +52,7 @@ function SortableCard({
       {...attributes}
       {...listeners}
       onClick={onClick}
-      className="group cursor-grab active:cursor-grabbing touch-none"
+      className="group cursor-grab touch-pan-y active:cursor-grabbing"
     >
       <CardBody task={task} members={members} />
     </div>

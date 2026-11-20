@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Plus, UserPlus, Users } from "lucide-react";
-import { useWorkspaces } from "../../features/workspaces/hooks/use-workspaces";
+import { Plus, Trash2, UserPlus, Users } from "lucide-react";
+import { useWorkspace } from "../../features/workspaces/hooks/use-workspace";
+import { useDeleteWorkspace } from "../../features/workspaces/hooks/use-delete-workspace";
 import { useProjects } from "../../features/projects/hooks/use-projects";
 import { ProjectCard } from "../../features/projects/components/ProjectCard";
 import { CreateProjectDialog } from "../../features/projects/components/CreateProjectDialog";
 import { Button } from "../../shared/ui/Button";
 import { IconButton } from "../../shared/ui/IconButton";
 import { Skeleton } from "../../shared/ui/Skeleton";
+import { ConfirmDialog } from "../../shared/ui/ConfirmDialog";
 import { formatWorkspaceRole } from "../../features/workspaces/lib/format-role";
 import { z } from "zod";
 import { MyTasksView } from "../../features/tasks/components/MyTasksView";
@@ -25,15 +27,15 @@ function WorkspaceDetailPage() {
   const { workspaceSlug } = Route.useParams();
   const { view } = Route.useSearch();
   const { auth } = Route.useRouteContext();
-  const { data: workspaces = [], isLoading: loadingWorkspaces } =
-    useWorkspaces();
+  const workspaceQuery = useWorkspace(workspaceSlug);
+  const workspace = workspaceQuery.data;
+  const deleteWorkspace = useDeleteWorkspace(workspaceSlug);
   const { data: projects = [], isLoading: loadingProjects } =
     useProjects(workspaceSlug);
   const [createOpen, setCreateOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
 
-  const workspace = workspaces.find((w) => w.slug === workspaceSlug);
-
-  if (loadingWorkspaces) {
+  if (workspaceQuery.isLoading) {
     return (
       <div className="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
         <WorkspacePageSkeleton />
@@ -45,7 +47,9 @@ function WorkspaceDetailPage() {
     return (
       <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
         <h1 className="text-2xl font-semibold text-foreground">
-          Espacio de trabajo no encontrado
+          {workspaceQuery.error instanceof Error
+            ? workspaceQuery.error.message
+            : "Espacio de trabajo no encontrado"}
         </h1>
         <p className="text-sm text-muted-foreground mt-2">
           No eres miembro de este espacio de trabajo o no existe.
@@ -104,6 +108,7 @@ function WorkspaceDetailPage() {
               </IconButton>
             </Link>
           )}
+             
           {canManage && (
             <Button onClick={() => setCreateOpen(true)}>
               <Plus className="size-4" />
@@ -150,6 +155,37 @@ function WorkspaceDetailPage() {
           onClose={() => setCreateOpen(false)}
           workspaceSlug={workspaceSlug}
         />
+      )}
+      {deleteOpen && (
+        <ConfirmDialog
+          title="Eliminar espacio de trabajo"
+          description="Esta acción es permanente y eliminará todos los proyectos, tareas, miembros e invitaciones del espacio."
+          confirmLabel="Eliminar espacio"
+          requiredText={workspace.name}
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={() => deleteWorkspace.mutate()}
+        />
+      )}
+      {workspace?.role === "owner" && (
+        <section className="mt-10 flex flex-col gap-4 border border-destructive/30 bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">
+              Zona de peligro
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Eliminar el proyecto también eliminará todas sus tareas.
+            </p>
+          </div>
+          <Button
+            variant="destructive"
+            loading={deleteWorkspace.isPending}
+            onClick={() => setDeleteOpen(true)}
+            className="w-full shrink-0 sm:w-auto"
+          >
+            <Trash2 className="size-4" />
+            Eliminar proyecto
+          </Button>
+        </section>
       )}
     </div>
   );

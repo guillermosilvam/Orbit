@@ -6,7 +6,7 @@ export function LoginPage() {
   const { redirect } = useSearch({ from: "/login" });
 
   return (
-    <main className="min-h-screen bg-dots flex items-center justify-center p-4">
+    <main className="flex min-h-dvh items-center justify-center bg-dots p-3 sm:p-4">
       <div className="w-full max-w-5xl border border-border bg-card grid grid-cols-1 lg:grid-cols-12">
         <div className="hidden lg:flex lg:col-span-7 flex-col justify-between p-8 border-r border-border min-h-150">
           <OrbitalCanvas />
@@ -20,7 +20,7 @@ export function LoginPage() {
           </div>
         </div>
 
-        <div className="lg:col-span-5 flex flex-col justify-between p-8 min-h-150">
+        <div className="flex flex-col justify-center p-5 sm:p-8 lg:col-span-5 lg:min-h-150 lg:justify-between">
           <div>
             <div className="flex items-center gap-2 border-b border-border pb-4 mb-8">
               <svg

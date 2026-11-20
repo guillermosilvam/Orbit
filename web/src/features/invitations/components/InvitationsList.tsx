@@ -1,8 +1,10 @@
+import { useState } from "react";
 import { Clock, Trash2 } from "lucide-react";
 import type { InvitationListItemDto } from "@orbit/shared/types/responses";
 import { useRevokeInvitation } from "../hooks/use-revoke-invitation";
 import { IconButton } from "../../../shared/ui/IconButton";
 import { formatWorkspaceRole } from "../../workspaces/lib/format-role";
+import { ConfirmDialog } from "../../../shared/ui/ConfirmDialog";
 
 type Props = {
   invitations: InvitationListItemDto[];
@@ -20,6 +22,8 @@ type Props = {
  * guarda solo el hash). Para compartir de nuevo, revoca y crea otra.
  */
 export function InvitationsList({ invitations, workspaceSlug }: Props) {
+  const [invitationToRevoke, setInvitationToRevoke] =
+    useState<InvitationListItemDto | null>(null);
   const revoke = useRevokeInvitation(workspaceSlug);
 
   if (invitations.length === 0) {
@@ -63,21 +67,22 @@ export function InvitationsList({ invitations, workspaceSlug }: Props) {
           <IconButton
             variant="danger"
             aria-label="Revocar invitación"
-            onClick={() => {
-              if (
-                confirm(
-                  "¿Revocar esta invitación? El enlace dejará de funcionar.",
-                )
-              ) {
-                revoke.mutate(inv.id);
-              }
-            }}
+            onClick={() => setInvitationToRevoke(inv)}
             disabled={revoke.isPending}
           >
             <Trash2 className="size-4" />
           </IconButton>
         </div>
       ))}
+      {invitationToRevoke && (
+        <ConfirmDialog
+          title="Revocar invitación"
+          description="El enlace dejará de funcionar y la persona ya no podrá usarlo para unirse."
+          confirmLabel="Revocar invitación"
+          onClose={() => setInvitationToRevoke(null)}
+          onConfirm={() => revoke.mutate(invitationToRevoke.id)}
+        />
+      )}
     </div>
   );
 }

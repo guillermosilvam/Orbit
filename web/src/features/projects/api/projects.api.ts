@@ -1,5 +1,8 @@
 import { apiClient } from "../../../shared/lib/api-client";
-import type { CreateProjectInputDto } from "@orbit/shared/schemas/project.schema";
+import type {
+  CreateProjectInputDto,
+  UpdateProjectInputDto,
+} from "@orbit/shared/schemas/project.schema";
 import type { ProjectResponseDto } from "@orbit/shared/types/responses";
 
 
@@ -13,5 +16,21 @@ export const projectsApi = {
     apiClient<{ project: ProjectResponseDto }>(
       `/workspaces/${workspaceSlug}/projects`,
       { method: "POST", body: input },
+    ),
+
+  update: (
+    workspaceSlug: string,
+    projectKey: string,
+    input: UpdateProjectInputDto,
+  ) =>
+    apiClient<{ project: ProjectResponseDto }>(
+      `/workspaces/${workspaceSlug}/projects/${projectKey}`,
+      { method: "PATCH", body: input },
+    ),
+
+  delete: (workspaceSlug: string, projectKey: string) =>
+    apiClient<null>(
+      `/workspaces/${workspaceSlug}/projects/${projectKey}`,
+      { method: "DELETE" },
     ),
 };

@@ -23,7 +23,7 @@ export function KanbanColumn({
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
   return (
-    <div className="bg-card flex flex-col min-h-125">
+    <div className="flex min-h-64 flex-col bg-card sm:min-h-125">
       <header className="px-3 py-2 border-b border-border flex items-center justify-between">
         <TaskStatusBadge status={status} />
         <span className="font-mono text-[10px] text-muted-foreground">

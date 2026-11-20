@@ -19,3 +19,16 @@ export const tasksListQueryOptions = (workspaceSlug: string, projectKey: string)
       return tasks;
     },
   });
+
+export const taskDetailQueryOptions = (
+  workspaceSlug: string,
+  projectKey: string,
+  number: number,
+) =>
+  queryOptions({
+    queryKey: queryKeys.tasks.detail(workspaceSlug, projectKey, number),
+    queryFn: async () => {
+      const { task } = await tasksApi.get(workspaceSlug, projectKey, number);
+      return task;
+    },
+  });

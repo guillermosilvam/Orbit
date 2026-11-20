@@ -2,7 +2,8 @@ import { useState } from "react";
 import {
   DndContext,
   DragOverlay,
-  PointerSensor,
+  MouseSensor,
+  TouchSensor,
   closestCorners,
   useSensor,
   useSensors,
@@ -38,7 +39,10 @@ export function KanbanBoard({
   const updateTask = useUpdateTask(workspaceSlug, projectKey);
 
   const sensors = useSensors(
-    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(TouchSensor, {
+      activationConstraint: { delay: 200, tolerance: 8 },
+    }),
   );
 
   const activeTask = activeId ? tasks.find((t) => t.id === activeId) : null;
@@ -102,24 +106,22 @@ export function KanbanBoard({
       onDragCancel={handleDragCancel}
     >
       <div
-        className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0"
+        className="grid min-w-0 grid-cols-1 gap-px border border-border bg-border sm:grid-cols-3"
         role="region"
         aria-label="Tablero de tareas"
         tabIndex={0}
       >
-        <div className="grid min-w-[48rem] grid-cols-3 gap-px border border-border bg-border lg:min-w-0">
-          {TASK_STATUSES.map((status) => (
-            <KanbanColumn
-              key={status}
-              status={status}
-              tasks={tasks
-                .filter((t) => t.status === status)
-                .sort((a, b) => a.position - b.position)}
-              onSelectTask={onSelectTask}
-              members={members}
-            />
-          ))}
-        </div>
+        {TASK_STATUSES.map((status) => (
+          <KanbanColumn
+            key={status}
+            status={status}
+            tasks={tasks
+              .filter((t) => t.status === status)
+              .sort((a, b) => a.position - b.position)}
+            onSelectTask={onSelectTask}
+            members={members}
+          />
+        ))}
       </div>
 
       <DragOverlay>

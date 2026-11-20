@@ -10,6 +10,15 @@ export const workspacesListQueryOptions = queryOptions({
     },
 });
 
+export const workspaceQueryOptions = (workspaceSlug: string) =>
+    queryOptions({
+        queryKey: queryKeys.workspaces.detail(workspaceSlug),
+        queryFn: async () => {
+            const { workspace } = await workspacesApi.get(workspaceSlug);
+            return workspace;
+        },
+    });
+
 export const membersQueryOptions = (workspaceSlug: string) =>
     queryOptions({
         queryKey: queryKeys.workspaces.members(workspaceSlug),

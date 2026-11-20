@@ -1,11 +1,12 @@
 import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { Pencil, Plus, Trash2 } from "lucide-react";
 import type { TaskResponseDto } from "@orbit/shared/types/responses";
 import { useProject } from "../../features/tasks/hooks/use-project";
 import { useTasks } from "../../features/tasks/hooks/use-tasks";
-import { useWorkspaces } from "../../features/workspaces/hooks/use-workspaces";
+import { useWorkspace } from "../../features/workspaces/hooks/use-workspace";
 import { useMembers } from "../../features/workspaces/hooks/use-members";
+import { useDeleteProject } from "../../features/projects/hooks/use-delete-project";
 import {
   type TaskPriority,
 } from "@orbit/shared/schemas/task.schema";
@@ -19,12 +20,13 @@ import {
   TaskFilters,
   type TaskGroupBy,
 } from "../../features/tasks/components/TaskFilters";
-import { TaskProgress } from "../../features/tasks/components/TaskProgress";
 import { CreateTaskDialog } from "../../features/tasks/components/CreateTaskDialog";
+import { ProjectSettingsDialog } from "../../features/projects/components/ProjectSettingsDialog";
 import { TaskDetailDrawer } from "../../features/tasks/components/TaskDetailDrawer";
 import { Button } from "../../shared/ui/Button";
 import { Breadcrumb } from "../../shared/ui/Breadcrumb";
 import { Skeleton } from "../../shared/ui/Skeleton";
+import { ConfirmDialog } from "../../shared/ui/ConfirmDialog";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/projects/$projectKey",
@@ -38,10 +40,13 @@ function ProjectDetailPage() {
   const { workspaceSlug, projectKey } = Route.useParams();
   const project = useProject(workspaceSlug, projectKey);
   const tasks = useTasks(workspaceSlug, projectKey);
-  const { data: workspaces = [] } = useWorkspaces();
+  const workspaceQuery = useWorkspace(workspaceSlug);
+  const workspace = workspaceQuery.data;
   const membersQuery = useMembers(workspaceSlug);
   const members = membersQuery.data ?? [];
   const [createOpen, setCreateOpen] = useState(false);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("list");
   const [priorityFilter, setPriorityFilter] =
     useState<TaskPriority | "all">("all");
@@ -51,8 +56,8 @@ function ProjectDetailPage() {
   const [selectedTask, setSelectedTask] = useState<TaskResponseDto | null>(
     null,
   );
+  const deleteProject = useDeleteProject(workspaceSlug, projectKey);
 
-  const workspace = workspaces.find((w) => w.slug === workspaceSlug);
   const taskList = tasks.data;
   const filteredTasks = taskList?.filter((task) => {
     const matchesPriority =
@@ -134,16 +139,28 @@ function ProjectDetailPage() {
             </p>
           )}
         </div>
-        <Button
-          onClick={() => setCreateOpen(true)}
-          className="w-full sm:w-auto"
-        >
-          <Plus className="size-4" />
-          Nueva tarea
-        </Button>
+        <div className="flex flex-col gap-2 sm:flex-row">
+          {(workspace?.role === "owner" || workspace?.role === "admin") && (
+            <>
+              <Button
+                variant="secondary"
+                onClick={() => setSettingsOpen(true)}
+                className="w-full sm:w-auto"
+              >
+                <Pencil className="size-4" />
+                Editar proyecto
+              </Button>
+            </>
+          )}
+          <Button
+            onClick={() => setCreateOpen(true)}
+            className="w-full sm:w-auto"
+          >
+            <Plus className="size-4" />
+            Nueva tarea
+          </Button>
+        </div>
       </header>
-
-      {taskList && <TaskProgress tasks={taskList} />}
 
       <div className="mb-4 flex gap-0 border-b border-border">
         <TabButton active={tab === "list"} onClick={() => setTab("list")}>
@@ -219,6 +236,28 @@ function ProjectDetailPage() {
         )
       ) : null}
 
+      {(workspace?.role === "owner" || workspace?.role === "admin") && (
+        <section className="mt-10 flex flex-col gap-4 border border-destructive/30 bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div>
+            <h2 className="text-sm font-semibold text-foreground">
+              Zona de peligro
+            </h2>
+            <p className="mt-1 text-xs text-muted-foreground">
+              Eliminar el proyecto también eliminará todas sus tareas.
+            </p>
+          </div>
+          <Button
+            variant="destructive"
+            loading={deleteProject.isPending}
+            onClick={() => setDeleteOpen(true)}
+            className="w-full shrink-0 sm:w-auto"
+          >
+            <Trash2 className="size-4" />
+            Eliminar proyecto
+          </Button>
+        </section>
+      )}
+
       <CreateTaskDialog
         open={createOpen}
         onClose={() => setCreateOpen(false)}
@@ -226,12 +265,31 @@ function ProjectDetailPage() {
         projectKey={projectKey}
       />
 
+      {workspace?.role && project.data && (
+        <ProjectSettingsDialog
+          open={settingsOpen}
+          onClose={() => setSettingsOpen(false)}
+          workspaceSlug={workspaceSlug}
+          project={project.data}
+        />
+      )}
+
       <TaskDetailDrawer
         task={selectedTask}
         onClose={() => setSelectedTask(null)}
         workspaceSlug={workspaceSlug}
         projectKey={projectKey}
       />
+      {deleteOpen && (
+        <ConfirmDialog
+          title="Eliminar proyecto"
+          description="Esta acción es permanente y borrará también todas las tareas del proyecto."
+          confirmLabel="Eliminar proyecto"
+          requiredText={project.data.name}
+          onClose={() => setDeleteOpen(false)}
+          onConfirm={() => deleteProject.mutate()}
+        />
+      )}
     </div>
   );
 }

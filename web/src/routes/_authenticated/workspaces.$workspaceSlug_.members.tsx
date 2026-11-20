@@ -1,11 +1,13 @@
+import { useState } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { useWorkspaces } from "../../features/workspaces/hooks/use-workspaces";
+import { useWorkspace } from "../../features/workspaces/hooks/use-workspace";
 import { useMembers } from "../../features/workspaces/hooks/use-members";
 import { useLeaveWorkspace } from "../../features/workspaces/hooks/use-leave-workspace";
 import { MembersList } from "../../features/workspaces/components/MembersList";
 import { Button } from "../../shared/ui/Button";
 import { Breadcrumb } from "../../shared/ui/Breadcrumb";
 import { Skeleton } from "../../shared/ui/Skeleton";
+import { ConfirmDialog } from "../../shared/ui/ConfirmDialog";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/members",
@@ -16,18 +18,17 @@ export const Route = createFileRoute(
 function MembersPage() {
   const { auth } = Route.useRouteContext();
   const { workspaceSlug } = Route.useParams();
-  const { data: workspaces = [], isLoading: loadingWorkspaces } =
-    useWorkspaces();
+  const workspaceQuery = useWorkspace(workspaceSlug);
+  const workspace = workspaceQuery.data;
   const { data: members = [], isLoading: loadingMembers } =
     useMembers(workspaceSlug);
   const leave = useLeaveWorkspace(workspaceSlug);
+  const [leaveOpen, setLeaveOpen] = useState(false);
 
   const user = auth.user;
-  const workspace = workspaces.find((w) => w.slug === workspaceSlug);
-
   if (!user) return null;
 
-  if (loadingWorkspaces) {
+  if (workspaceQuery.isLoading) {
     return (
       <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
         <Skeleton className="mb-2 h-3 w-32" />
@@ -44,7 +45,9 @@ function MembersPage() {
           items={[{ label: "Inicio", to: "/" }, { label: "Miembros" }]}
         />
         <h1 className="text-2xl font-semibold text-foreground">
-          Espacio de trabajo no encontrado
+          {workspaceQuery.error instanceof Error
+            ? workspaceQuery.error.message
+            : "Espacio de trabajo no encontrado"}
         </h1>
       </div>
     );
@@ -79,11 +82,7 @@ function MembersPage() {
         {!isOwner && (
           <Button
             variant="secondary"
-            onClick={() => {
-              if (confirm("¿Salir de este espacio de trabajo?")) {
-                leave.mutate();
-              }
-            }}
+            onClick={() => setLeaveOpen(true)}
             loading={leave.isPending}
           >
             Salir del espacio
@@ -107,6 +106,15 @@ function MembersPage() {
           Como propietario no puedes salir del espacio de trabajo sin transferir
           la propiedad.
         </p>
+      )}
+      {leaveOpen && (
+        <ConfirmDialog
+          title="Salir del espacio de trabajo"
+          description="Dejarás de tener acceso a sus proyectos y tareas. Un administrador tendrá que invitarte de nuevo."
+          confirmLabel="Salir del espacio"
+          onClose={() => setLeaveOpen(false)}
+          onConfirm={() => leave.mutate()}
+        />
       )}
     </div>
   );

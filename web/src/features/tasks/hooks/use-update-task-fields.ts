@@ -16,7 +16,15 @@ export function useUpdateTaskFields(workspaceSlug: string, projectKey: string) {
       input: UpdateTaskInputDto;
     }) => tasksApi.update(workspaceSlug, projectKey, number, input),
 
-    onSuccess: () => {
+    onSuccess: ({ task }, variables) => {
+      queryClient.setQueryData(
+        queryKeys.tasks.detail(
+          workspaceSlug,
+          projectKey,
+          variables.number,
+        ),
+        task,
+      );
       queryClient.invalidateQueries({
         queryKey: queryKeys.tasks.list(workspaceSlug, projectKey),
       });

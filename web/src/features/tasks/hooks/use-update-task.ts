@@ -44,6 +44,13 @@ export function useUpdateTask(workspaceSlug: string, projectKey: string) {
             if (ctx?.previous) queryClient.setQueryData(queryKey, ctx.previous);
         },
 
+        onSuccess: ({ task }, input) => {
+            queryClient.setQueryData(
+                queryKeys.tasks.detail(workspaceSlug, projectKey, input.number),
+                task,
+            );
+        },
+
         onSettled: () => {
             queryClient.invalidateQueries({ queryKey });
         },

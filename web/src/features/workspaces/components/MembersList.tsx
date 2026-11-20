@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { Trash2 } from "lucide-react";
 import type { WorkspaceMemberResponseDto } from "@orbit/shared/types/responses";
 import type { WorkspaceRole } from "@orbit/shared/schemas/workspace.schema";
@@ -5,6 +6,7 @@ import { useUpdateMemberRole } from "../hooks/use-update-member-role";
 import { useRemoveMember } from "../hooks/use-remove-member";
 import { IconButton } from "../../../shared/ui/IconButton";
 import { formatWorkspaceRole } from "../lib/format-role";
+import { ConfirmDialog } from "../../../shared/ui/ConfirmDialog";
 
 type Props = {
   members: WorkspaceMemberResponseDto[];
@@ -19,6 +21,8 @@ export function MembersList({
   currentUserId,
   currentUserRole,
 }: Props) {
+  const [memberToRemove, setMemberToRemove] =
+    useState<WorkspaceMemberResponseDto | null>(null);
   const updateRole = useUpdateMemberRole(workspaceSlug);
   const remove = useRemoveMember(workspaceSlug);
 
@@ -81,11 +85,7 @@ export function MembersList({
               <IconButton
                 variant="danger"
                 aria-label={`Quitar a ${member.user.name}`}
-                onClick={() => {
-                  if (confirm(`¿Quitar a ${member.user.name} del workspace?`)) {
-                    remove.mutate(member.userId);
-                  }
-                }}
+                onClick={() => setMemberToRemove(member)}
                 disabled={remove.isPending}
               >
                 <Trash2 className="size-4" />
@@ -96,6 +96,15 @@ export function MembersList({
           </div>
         );
       })}
+      {memberToRemove && (
+        <ConfirmDialog
+          title="Quitar miembro"
+          description={`¿Quitar a ${memberToRemove.user.name} de este espacio de trabajo? Perderá acceso a sus proyectos y tareas.`}
+          confirmLabel="Quitar miembro"
+          onClose={() => setMemberToRemove(null)}
+          onConfirm={() => remove.mutate(memberToRemove.userId)}
+        />
+      )}
     </div>
   );
 }

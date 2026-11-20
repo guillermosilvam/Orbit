@@ -18,6 +18,11 @@ export const tasksApi = {
             `/workspaces/${workspaceSlug}/projects/${projectKey}/tasks`,
         ),
 
+    get: (workspaceSlug: string, projectKey: string, number: number) =>
+        apiClient<{ task: TaskResponseDto }>(
+            `/workspaces/${workspaceSlug}/projects/${projectKey}/tasks/${number}`,
+        ),
+
     create: (
         workspaceSlug: string,
         projectKey: string,

@@ -14,11 +14,19 @@ export const workspacesApi = {
     list: () =>
         apiClient<{ workspaces: WorkspaceWithRoleDto[] }>("/workspaces"),
 
+    get: (workspaceSlug: string) =>
+        apiClient<{ workspace: WorkspaceWithRoleDto }>(
+            `/workspaces/${workspaceSlug}`,
+        ),
+
     create: (input: CreateWorkspaceInputDto) =>
         apiClient<{ workspace: WorkspaceResponseDto }>("/workspaces", {
             method: "POST",
             body: input,
         }),
+
+    delete: (workspaceSlug: string) =>
+        apiClient<null>(`/workspaces/${workspaceSlug}`, { method: "DELETE" }),
 
     listMembers: (workspaceSlug: string) =>
         apiClient<{ members: WorkspaceMemberResponseDto[] }>(
