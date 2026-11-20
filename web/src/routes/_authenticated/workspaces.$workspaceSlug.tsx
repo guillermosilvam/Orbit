@@ -7,6 +7,8 @@ import { ProjectCard } from "../../features/projects/components/ProjectCard";
 import { CreateProjectDialog } from "../../features/projects/components/CreateProjectDialog";
 import { Button } from "../../shared/ui/Button";
 import { IconButton } from "../../shared/ui/IconButton";
+import { Skeleton } from "../../shared/ui/Skeleton";
+import { formatWorkspaceRole } from "../../features/workspaces/lib/format-role";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug",
@@ -26,20 +28,20 @@ function WorkspaceDetailPage() {
 
   if (loadingWorkspaces) {
     return (
-      <div className="p-8">
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+      <div className="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
+        <WorkspacePageSkeleton />
       </div>
     );
   }
 
   if (!workspace) {
     return (
-      <div className="p-8 max-w-3xl mx-auto">
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
         <h1 className="text-2xl font-semibold text-foreground">
-          Workspace no encontrado
+          Espacio de trabajo no encontrado
         </h1>
         <p className="text-sm text-muted-foreground mt-2">
-          No eres miembro de este workspace o no existe.
+          No eres miembro de este espacio de trabajo o no existe.
         </p>
       </div>
     );
@@ -48,18 +50,21 @@ function WorkspaceDetailPage() {
   const canManage = workspace.role === "owner" || workspace.role === "admin";
 
   return (
-    <div className="p-8 max-w-300 mx-auto">
-      <header className="flex items-end justify-between mb-6 gap-4">
+    <div className="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
+      <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <p className="text-xs text-muted-foreground mb-1">
-            Workspace · <span className="font-mono">{workspace.role}</span>
+            Espacio de trabajo ·{" "}
+            <span className="font-medium text-foreground">
+              {formatWorkspaceRole(workspace.role)}
+            </span>
           </p>
-          <h1 className="text-2xl font-semibold text-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             {workspace.name}
           </h1>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <Link
             to="/workspaces/$workspaceSlug/members"
             params={{ workspaceSlug }}
@@ -90,11 +95,13 @@ function WorkspaceDetailPage() {
       </header>
 
       {loadingProjects && (
-        <p className="text-sm text-muted-foreground">Cargando proyectos…</p>
+        <div role="status" aria-label="Cargando proyectos">
+          <ProjectCardsSkeleton />
+        </div>
       )}
 
       {!loadingProjects && projects.length === 0 && (
-        <div className="border border-border bg-card p-12 text-center">
+        <div className="border border-border bg-card px-5 py-12 text-center sm:px-12">
           <h2 className="text-lg font-semibold text-foreground">
             Aún no hay proyectos
           </h2>
@@ -111,7 +118,7 @@ function WorkspaceDetailPage() {
       )}
 
       {!loadingProjects && projects.length > 0 && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-border border border-border">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {projects.map((p) => (
             <ProjectCard key={p.id} project={p} workspaceSlug={workspaceSlug} />
           ))}
@@ -125,6 +132,34 @@ function WorkspaceDetailPage() {
           workspaceSlug={workspaceSlug}
         />
       )}
+    </div>
+  );
+}
+
+function WorkspacePageSkeleton() {
+  return (
+    <div role="status" aria-label="Cargando espacio de trabajo">
+      <Skeleton className="mb-2 h-3 w-32" />
+      <Skeleton className="mb-8 h-8 w-64 max-w-full" />
+      <ProjectCardsSkeleton />
+    </div>
+  );
+}
+
+function ProjectCardsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+      {Array.from({ length: 3 }, (_, index) => (
+        <div
+          key={index}
+          className="border border-border bg-card p-5"
+          aria-hidden="true"
+        >
+          <Skeleton className="mb-5 h-4 w-16" />
+          <Skeleton className="mb-2 h-4 w-2/3" />
+          <Skeleton className="h-3 w-1/2" />
+        </div>
+      ))}
     </div>
   );
 }

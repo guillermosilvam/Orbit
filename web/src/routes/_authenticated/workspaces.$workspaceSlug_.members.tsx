@@ -5,6 +5,7 @@ import { useLeaveWorkspace } from "../../features/workspaces/hooks/use-leave-wor
 import { MembersList } from "../../features/workspaces/components/MembersList";
 import { Button } from "../../shared/ui/Button";
 import { Breadcrumb } from "../../shared/ui/Breadcrumb";
+import { Skeleton } from "../../shared/ui/Skeleton";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/members",
@@ -28,21 +29,22 @@ function MembersPage() {
 
   if (loadingWorkspaces) {
     return (
-      <div className="p-8">
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+        <Skeleton className="mb-2 h-3 w-32" />
+        <Skeleton className="h-8 w-48" />
       </div>
     );
   }
 
   if (!workspace) {
     return (
-      <div className="p-8 max-w-3xl mx-auto">
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
         <Breadcrumb
           className="mb-4"
           items={[{ label: "Inicio", to: "/" }, { label: "Miembros" }]}
         />
         <h1 className="text-2xl font-semibold text-foreground">
-          Workspace no encontrado
+          Espacio de trabajo no encontrado
         </h1>
       </div>
     );
@@ -51,7 +53,7 @@ function MembersPage() {
   const isOwner = workspace.role === "owner";
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
+    <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
       <Breadcrumb
         className="mb-4"
         items={[
@@ -64,11 +66,13 @@ function MembersPage() {
         ]}
       />
 
-      <header className="flex items-end justify-between mb-6 gap-4">
+      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">Miembros</h1>
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+            Miembros
+          </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Personas con acceso a este workspace.
+            Personas con acceso a este espacio de trabajo.
           </p>
         </div>
 
@@ -76,19 +80,19 @@ function MembersPage() {
           <Button
             variant="secondary"
             onClick={() => {
-              if (confirm("¿Salir de este workspace?")) {
+              if (confirm("¿Salir de este espacio de trabajo?")) {
                 leave.mutate();
               }
             }}
             loading={leave.isPending}
           >
-            Salir del workspace
+            Salir del espacio
           </Button>
         )}
       </header>
 
       {loadingMembers ? (
-        <p className="text-sm text-muted-foreground">Cargando miembros…</p>
+        <MembersSkeleton />
       ) : (
         <MembersList
           members={members}
@@ -100,9 +104,32 @@ function MembersPage() {
 
       {isOwner && (
         <p className="text-xs text-muted-foreground mt-4">
-          Como owner no puedes salir del workspace sin transferir la propiedad.
+          Como propietario no puedes salir del espacio de trabajo sin transferir
+          la propiedad.
         </p>
       )}
+    </div>
+  );
+}
+
+function MembersSkeleton() {
+  return (
+    <div
+      role="status"
+      aria-label="Cargando miembros"
+      className="border border-border bg-card"
+    >
+      {Array.from({ length: 4 }, (_, index) => (
+        <div
+          key={index}
+          className="flex items-center gap-3 border-b border-border px-4 py-3 last:border-b-0"
+          aria-hidden="true"
+        >
+          <Skeleton className="size-9 shrink-0" />
+          <Skeleton className="h-4 flex-1" />
+          <Skeleton className="h-6 w-20" />
+        </div>
+      ))}
     </div>
   );
 }

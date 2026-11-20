@@ -4,6 +4,8 @@ import { useInvitationPreview } from "../../features/invitations/hooks/use-invit
 import { useAcceptInvitation } from "../../features/invitations/hooks/use-accept-invitation";
 import { Button } from "../../shared/ui/Button";
 import { ApiError } from "../../shared/lib/api-client";
+import { formatWorkspaceRole } from "../../features/workspaces/lib/format-role";
+import { Skeleton } from "../../shared/ui/Skeleton";
 
 export const Route = createFileRoute("/_authenticated/invitations/$token")({
   component: AcceptInvitationPage,
@@ -17,9 +19,17 @@ function AcceptInvitationPage() {
   if (preview.isLoading) {
     return (
       <main className="min-h-screen bg-dots flex items-center justify-center p-4">
-        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          Cargando invitación…
-        </p>
+        <div
+          role="status"
+          aria-label="Cargando invitación"
+          className="w-full max-w-md border border-border bg-card p-6 sm:p-8"
+        >
+          <Skeleton className="mb-3 h-3 w-24" />
+          <Skeleton className="mb-2 h-7 w-48 max-w-full" />
+          <Skeleton className="mb-6 h-3 w-32" />
+          <Skeleton className="mb-6 h-20 w-full" />
+          <Skeleton className="h-10 w-full" />
+        </div>
       </main>
     );
   }
@@ -32,7 +42,7 @@ function AcceptInvitationPage() {
 
     return (
       <main className="min-h-screen bg-dots flex items-center justify-center p-4">
-        <div className="w-full max-w-md border border-border bg-card p-8 text-center">
+        <div className="w-full max-w-md border border-border bg-card p-6 text-center sm:p-8">
           <X className="size-8 text-destructive mx-auto mb-3" />
           <h1 className="text-lg font-semibold text-foreground">
             Invitación no disponible
@@ -59,7 +69,7 @@ function AcceptInvitationPage() {
 
   return (
     <main className="min-h-screen bg-dots flex items-center justify-center p-4">
-      <div className="w-full max-w-md border border-border bg-card p-8">
+      <div className="w-full max-w-md border border-border bg-card p-6 sm:p-8">
         <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
           Invitación
         </p>
@@ -75,8 +85,8 @@ function AcceptInvitationPage() {
             <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
               Rol
             </p>
-            <p className="text-sm text-foreground font-mono uppercase">
-              {invitation.role}
+            <p className="text-sm text-foreground">
+              {formatWorkspaceRole(invitation.role)}
             </p>
           </div>
           <div className="bg-card p-3">

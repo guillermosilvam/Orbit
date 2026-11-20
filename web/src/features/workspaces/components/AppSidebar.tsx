@@ -9,8 +9,12 @@ import { IconButton } from "../../../shared/ui/IconButton";
 
 export function AppSidebar({
   user,
+  className,
+  onNavigate,
 }: {
   user: { id: string; email: string; name: string; createdAt: string };
+  className?: string;
+  onNavigate?: () => void;
 }) {
   const { data: workspaces = [] } = useWorkspaces();
   const match = useMatchRoute();
@@ -28,12 +32,15 @@ export function AppSidebar({
 
   return (
     <>
-      <aside className="w-60 bg-sidebar border-r border-border flex flex-col shrink-0">
+      <aside
+        className={`w-60 shrink-0 flex-col border-r border-border bg-sidebar ${className ?? "flex"}`}
+      >
         <div className="p-4 border-b border-border ">
           <Link
             to="/"
             className="inline-flex items-center gap-2 shrink-0"
             aria-label="Ir al inicio"
+            onClick={onNavigate}
           >
             <svg
               className="text-primary"
@@ -63,8 +70,6 @@ export function AppSidebar({
         <div className="flex-1 overflow-auto p-4">
           {current ? (
             <>
-              {/* Nombre del workspace sin la etiqueta "WORKSPACE" (esa
-                  se reserva al bloque de secciones). */}
               <p className="text-sm font-medium text-foreground truncate">
                 {current.name}
               </p>
@@ -95,6 +100,7 @@ export function AppSidebar({
                             workspaceSlug: current.slug,
                             projectKey: p.key,
                           }}
+                          onNavigate={onNavigate}
                         >
                           <span className="font-mono text-[10px] text-muted-foreground">
                             {p.key}
@@ -108,12 +114,13 @@ export function AppSidebar({
               </div>
 
               <div className="mt-6">
-                <p className="section-label mb-2">Gestion de Equipo</p>
+                <p className="section-label mb-2">Gestión de equipo</p>
                 <ul className="space-y-0.5">
                   <li>
                     <SidebarLink
                       to="/workspaces/$workspaceSlug/members"
                       params={{ workspaceSlug: current.slug }}
+                      onNavigate={onNavigate}
                     >
                       <Users className="size-3.5" />
                       <span>Miembros</span>
@@ -124,6 +131,7 @@ export function AppSidebar({
                       <SidebarLink
                         to="/workspaces/$workspaceSlug/invitations"
                         params={{ workspaceSlug: current.slug }}
+                        onNavigate={onNavigate}
                       >
                         <UserPlus className="size-3.5" />
                         <span>Invitaciones</span>
@@ -135,7 +143,7 @@ export function AppSidebar({
             </>
           ) : (
             <p className="text-xs text-muted-foreground">
-              Selecciona un workspace para ver su contenido.
+              Selecciona un espacio de trabajo para ver su contenido.
             </p>
           )}
         </div>
@@ -158,10 +166,12 @@ function SidebarLink({
   to,
   params,
   children,
+  onNavigate,
 }: {
   to: string;
   params: Record<string, string>;
   children: React.ReactNode;
+  onNavigate?: () => void;
 }) {
   const match = useMatchRoute();
   const isActive = Boolean(match({ to, params, fuzzy: true }));
@@ -170,6 +180,7 @@ function SidebarLink({
     <Link
       to={to}
       params={params}
+      onClick={onNavigate}
       className={`flex items-center gap-2 px-2 py-1.5 text-sm transition-colors ${
         isActive
           ? "text-foreground border-l-2 border-l-primary pl-1.5"

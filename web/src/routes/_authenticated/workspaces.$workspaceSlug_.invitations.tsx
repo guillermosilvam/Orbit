@@ -7,6 +7,7 @@ import { InvitationsList } from "../../features/invitations/components/Invitatio
 import { CreateInvitationDialog } from "../../features/invitations/components/CreateInvitationDialog";
 import { Button } from "../../shared/ui/Button";
 import { Breadcrumb } from "../../shared/ui/Breadcrumb";
+import { Skeleton } from "../../shared/ui/Skeleton";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/invitations",
@@ -26,21 +27,22 @@ function InvitationsPage() {
 
   if (loadingWorkspaces) {
     return (
-      <div className="p-8">
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
+        <Skeleton className="mb-2 h-3 w-32" />
+        <Skeleton className="h-8 w-48" />
       </div>
     );
   }
 
   if (!workspace) {
     return (
-      <div className="p-8 max-w-3xl mx-auto">
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
         <Breadcrumb
           className="mb-4"
           items={[{ label: "Inicio", to: "/" }, { label: "Invitaciones" }]}
         />
         <h1 className="text-2xl font-semibold text-foreground">
-          Workspace no encontrado
+          Espacio de trabajo no encontrado
         </h1>
       </div>
     );
@@ -50,7 +52,7 @@ function InvitationsPage() {
 
   if (!canManage) {
     return (
-      <div className="p-8 max-w-3xl mx-auto">
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
         <Breadcrumb
           className="mb-4"
           items={[
@@ -64,14 +66,14 @@ function InvitationsPage() {
         />
         <h1 className="text-2xl font-semibold text-foreground">Sin acceso</h1>
         <p className="text-sm text-muted-foreground mt-2">
-          Solo owners y admins pueden gestionar invitaciones.
+          Solo propietarios y administradores pueden gestionar invitaciones.
         </p>
       </div>
     );
   }
 
   return (
-    <div className="p-8 max-w-3xl mx-auto">
+    <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
       <Breadcrumb
         className="mb-4"
         items={[
@@ -84,23 +86,26 @@ function InvitationsPage() {
         ]}
       />
 
-      <header className="flex items-end justify-between mb-6 gap-4">
+      <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="text-2xl font-semibold text-foreground">
+          <h1 className="text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
             Invitaciones
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Links pendientes para unirse a este workspace.
+            Enlaces pendientes para unirse a este espacio de trabajo.
           </p>
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
+        <Button
+          onClick={() => setCreateOpen(true)}
+          className="w-full sm:w-auto"
+        >
           <Plus className="size-4" />
           Nueva invitación
         </Button>
       </header>
 
       {loadingInvitations ? (
-        <p className="text-sm text-muted-foreground">Cargando invitaciones…</p>
+        <InvitationsSkeleton />
       ) : (
         <InvitationsList
           invitations={invitations}
@@ -113,6 +118,28 @@ function InvitationsPage() {
         onClose={() => setCreateOpen(false)}
         workspaceSlug={workspaceSlug}
       />
+    </div>
+  );
+}
+
+function InvitationsSkeleton() {
+  return (
+    <div
+      role="status"
+      aria-label="Cargando invitaciones"
+      className="border border-border bg-card"
+    >
+      {Array.from({ length: 3 }, (_, index) => (
+        <div
+          key={index}
+          className="flex items-center gap-3 border-b border-border px-4 py-4 last:border-b-0"
+          aria-hidden="true"
+        >
+          <Skeleton className="h-5 w-16" />
+          <Skeleton className="h-4 flex-1" />
+          <Skeleton className="size-8" />
+        </div>
+      ))}
     </div>
   );
 }

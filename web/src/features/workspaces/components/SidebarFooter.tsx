@@ -2,7 +2,6 @@ import { LogOut } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import type { UserResponseDto } from "@orbit/shared/types/responses";
 import { useLogout } from "../../auth/hooks/use-logout";
-import { ThemePicker } from "./ThemePicker";
 
 export function SidebarFooter({ user }: { user: UserResponseDto }) {
   const logout = useLogout();
@@ -14,7 +13,7 @@ export function SidebarFooter({ user }: { user: UserResponseDto }) {
   };
 
   return (
-    <div className="border-t border-border p-3 space-y-2">
+    <div className="space-y-2 border-t border-border p-3">
       <div className="flex items-center gap-2 px-1 py-1">
         <div className="size-8 bg-card border border-border flex items-center justify-center font-semibold text-xs text-foreground shrink-0">
           {initials(user.name)}
@@ -28,8 +27,6 @@ export function SidebarFooter({ user }: { user: UserResponseDto }) {
           </p>
         </div>
       </div>
-
-      <ThemePicker />
 
       <button
         type="button"

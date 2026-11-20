@@ -16,7 +16,7 @@ export function ProjectCard({
     <Link
       to="/workspaces/$workspaceSlug/projects/$projectKey"
       params={{ workspaceSlug, projectKey: project.key }}
-      className="bg-card p-5 hover:bg-accent transition-colors flex flex-col gap-3"
+      className="flex flex-col gap-3 border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-accent"
     >
       <div className="flex items-start justify-between gap-3">
         <span className="font-mono text-[11px] uppercase tracking-wider text-muted-foreground border border-border px-1.5 py-0.5">

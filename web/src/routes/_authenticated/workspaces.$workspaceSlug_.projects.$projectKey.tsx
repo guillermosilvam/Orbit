@@ -11,6 +11,7 @@ import { CreateTaskDialog } from "../../features/tasks/components/CreateTaskDial
 import { TaskDetailDrawer } from "../../features/tasks/components/TaskDetailDrawer";
 import { Button } from "../../shared/ui/Button";
 import { Breadcrumb } from "../../shared/ui/Breadcrumb";
+import { Skeleton } from "../../shared/ui/Skeleton";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/projects/$projectKey",
@@ -35,15 +36,26 @@ function ProjectDetailPage() {
 
   if (project.isLoading) {
     return (
-      <div className="p-8">
-        <p className="text-sm text-muted-foreground">Cargando…</p>
+      <div
+        role="status"
+        aria-label="Cargando proyecto"
+        className="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8"
+      >
+        <Skeleton className="mb-5 h-3 w-40" />
+        <Skeleton className="mb-3 h-8 w-64 max-w-full" />
+        <Skeleton className="mb-8 h-4 w-80 max-w-full" />
+        <div className="space-y-2 border border-border bg-card p-4">
+          {Array.from({ length: 4 }, (_, index) => (
+            <Skeleton key={index} className="h-10 w-full" />
+          ))}
+        </div>
       </div>
     );
   }
 
   if (!project.data) {
     return (
-      <div className="p-8 max-w-3xl mx-auto">
+      <div className="mx-auto w-full max-w-3xl p-4 sm:p-6 lg:p-8">
         <h1 className="text-2xl font-semibold text-foreground">
           Proyecto no encontrado
         </h1>
@@ -54,7 +66,7 @@ function ProjectDetailPage() {
   const taskList = tasks.data;
 
   return (
-    <div className="p-8 max-w-300 mx-auto">
+    <div className="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
       <Breadcrumb
         className="mb-4"
         items={[
@@ -67,10 +79,10 @@ function ProjectDetailPage() {
         ]}
       />
 
-      <header className="flex items-end justify-between mb-6 gap-4">
-        <div>
+      <header className="mb-8 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+        <div className="min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h1 className="text-2xl font-semibold text-foreground">
+            <h1 className="truncate text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
               {project.data.name}
             </h1>
             <span className="font-mono text-xs text-muted-foreground border border-border px-1.5 py-0.5">
@@ -83,13 +95,16 @@ function ProjectDetailPage() {
             </p>
           )}
         </div>
-        <Button onClick={() => setCreateOpen(true)}>
+        <Button
+          onClick={() => setCreateOpen(true)}
+          className="w-full sm:w-auto"
+        >
           <Plus className="size-4" />
           Nueva tarea
         </Button>
       </header>
 
-      <div className="border-b border-border mb-4 flex gap-0">
+      <div className="mb-4 flex gap-0 border-b border-border">
         <TabButton active={tab === "list"} onClick={() => setTab("list")}>
           Lista
         </TabButton>
@@ -98,29 +113,25 @@ function ProjectDetailPage() {
         </TabButton>
       </div>
 
-      {tab === "list" && (
-        <>
-          {tasks.isLoading && (
-            <p className="text-sm text-muted-foreground">Cargando tareas…</p>
-          )}
-          {taskList && (
-            <TaskList
-              tasks={taskList}
-              workspaceSlug={workspaceSlug}
-              projectKey={projectKey}
-              onSelectTask={setSelectedTask}
-            />
-          )}
-        </>
-      )}
-
-      {tab === "board" && taskList && (
-        <KanbanBoard
-          tasks={taskList}
-          workspaceSlug={workspaceSlug}
-          projectKey={projectKey}
-          onSelectTask={setSelectedTask}
-        />
+      {tasks.isLoading ? (
+        tab === "board" ? <BoardSkeleton /> : <TaskListSkeleton />
+      ) : (
+        taskList &&
+        (tab === "list" ? (
+          <TaskList
+            tasks={taskList}
+            workspaceSlug={workspaceSlug}
+            projectKey={projectKey}
+            onSelectTask={setSelectedTask}
+          />
+        ) : (
+          <KanbanBoard
+            tasks={taskList}
+            workspaceSlug={workspaceSlug}
+            projectKey={projectKey}
+            onSelectTask={setSelectedTask}
+          />
+        ))
       )}
 
       <CreateTaskDialog
@@ -136,6 +147,46 @@ function ProjectDetailPage() {
         workspaceSlug={workspaceSlug}
         projectKey={projectKey}
       />
+    </div>
+  );
+}
+
+function TaskListSkeleton() {
+  return (
+    <div role="status" aria-label="Cargando tareas" className="space-y-2">
+      {Array.from({ length: 4 }, (_, index) => (
+        <Skeleton
+          key={index}
+          className="h-12 w-full border border-border bg-card"
+        />
+      ))}
+    </div>
+  );
+}
+
+function BoardSkeleton() {
+  return (
+    <div
+      role="status"
+      aria-label="Cargando tablero"
+      className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0"
+    >
+      <div className="grid min-w-3xl grid-cols-3 gap-3">
+        {Array.from({ length: 3 }, (_, columnIndex) => (
+          <div
+            key={columnIndex}
+            className="min-h-96 border border-border bg-card p-3"
+            aria-hidden="true"
+          >
+            <Skeleton className="mb-4 h-4 w-24" />
+            <div className="space-y-2">
+              {Array.from({ length: 3 }, (_, cardIndex) => (
+                <Skeleton key={cardIndex} className="h-20 w-full" />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

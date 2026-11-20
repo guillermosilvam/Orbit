@@ -14,6 +14,7 @@ import { Field } from "../../../shared/ui/Field";
 import { Input } from "../../../shared/ui/Input";
 import { useCreateInvitation } from "../hooks/use-create-invitation";
 import { ApiError } from "../../../shared/lib/api-client";
+import { formatWorkspaceRole } from "../../workspaces/lib/format-role";
 
 /**
  * Schema local para el form. Reemplaza `expiresInHours` de `z.coerce.number()`
@@ -109,7 +110,7 @@ export function CreateInvitationDialog({
         {!result && (
           <>
             <p className="text-sm text-muted-foreground mb-4">
-              Genera un link para invitar a alguien a este workspace.
+              Genera un enlace para invitar a alguien a este espacio de trabajo.
             </p>
 
             <form
@@ -126,8 +127,8 @@ export function CreateInvitationDialog({
                   className="h-10 w-full border border-border bg-card px-3 font-sans text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring"
                   {...form.register("role")}
                 >
-                  <option value="member">member</option>
-                  <option value="admin">admin</option>
+                  <option value="member">{formatWorkspaceRole("member")}</option>
+                  <option value="admin">{formatWorkspaceRole("admin")}</option>
                 </select>
               </Field>
 
@@ -208,13 +209,13 @@ function InvitationResult({
     <div className="flex flex-col gap-4 mt-2">
       <div className="border border-destructive/40 bg-destructive/5 p-3">
         <p className="text-xs text-destructive font-medium">
-          ⚠ Este link se muestra una sola vez. Cópialo ahora.
+          ⚠ Este enlace se muestra una sola vez. Cópialo ahora.
         </p>
       </div>
 
       <div className="flex flex-col gap-2">
         <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-          Link de invitación
+          Enlace de invitación
         </label>
         <div className="flex gap-px bg-border border border-border">
           <input
@@ -263,8 +264,8 @@ function InvitationResult({
       <div className="flex flex-col gap-2 pt-2 border-t border-border">
         <div className="flex justify-between text-xs">
           <span className="text-muted-foreground">Rol</span>
-          <span className="font-mono uppercase text-foreground">
-            {invitation.role}
+          <span className="text-foreground">
+            {formatWorkspaceRole(invitation.role)}
           </span>
         </div>
         {invitation.email && (

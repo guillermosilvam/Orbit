@@ -98,17 +98,24 @@ export function KanbanBoard({
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
-      <div className="grid grid-cols-3 gap-px bg-border border border-border">
-        {TASK_STATUSES.map((status) => (
-          <KanbanColumn
-            key={status}
-            status={status}
-            tasks={tasks
-              .filter((t) => t.status === status)
-              .sort((a, b) => a.position - b.position)}
-            onSelectTask={onSelectTask}
-          />
-        ))}
+      <div
+        className="-mx-4 overflow-x-auto px-4 sm:mx-0 sm:px-0"
+        role="region"
+        aria-label="Tablero de tareas"
+        tabIndex={0}
+      >
+        <div className="grid min-w-[48rem] grid-cols-3 gap-px border border-border bg-border lg:min-w-0">
+          {TASK_STATUSES.map((status) => (
+            <KanbanColumn
+              key={status}
+              status={status}
+              tasks={tasks
+                .filter((t) => t.status === status)
+                .sort((a, b) => a.position - b.position)}
+              onSelectTask={onSelectTask}
+            />
+          ))}
+        </div>
       </div>
 
       <DragOverlay>

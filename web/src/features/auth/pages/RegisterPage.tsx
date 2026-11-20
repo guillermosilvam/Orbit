@@ -15,7 +15,8 @@ export function RegisterPage() {
               Empieza en órbita.
             </h1>
             <p className="text-sm text-muted-foreground mt-2 max-w-md">
-              Workspaces, proyectos y tareas — organizados desde el día uno.
+              Espacios de trabajo, proyectos y tareas: todo organizado desde
+              el primer día.
             </p>
           </div>
         </div>

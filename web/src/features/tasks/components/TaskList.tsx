@@ -4,23 +4,15 @@ import { TaskStatusBadge } from "./TaskStatusBadge";
 import { TaskPriorityBadge } from "./TaskPriorityBadge";
 
 const STATUS_ORDER: TaskStatus[] = ["todo", "in_progress", "done"];
-const STATUS_SECTION: Record<TaskStatus, string> = {
-  todo: "Pendientes",
-  in_progress: "En progreso",
-  done: "Hechas",
-};
 
-export function TaskList({
-  tasks,
-  workspaceSlug,
-  projectKey,
-  onSelectTask,
-}: {
+type Props = {
   tasks: TaskResponseDto[];
   workspaceSlug: string;
   projectKey: string;
   onSelectTask: (task: TaskResponseDto) => void;
-}) {
+};
+
+export function TaskList({ tasks, onSelectTask }: Props) {
   const grouped = STATUS_ORDER.map((status) => ({
     status,
     tasks: tasks.filter((t) => t.status === status),
@@ -81,9 +73,9 @@ function TaskRow({
     <button
       type="button"
       onClick={onClick}
-      className="w-full flex items-center gap-3 px-4 py-3 border-b border-border last:border-b-0 hover:bg-accent transition-colors text-left"
+      className="flex w-full items-center gap-2 border-b border-border px-3 py-3 text-left transition-colors last:border-b-0 hover:bg-accent sm:gap-3 sm:px-4"
     >
-      <span className="font-mono text-[11px] text-muted-foreground tabular shrink-0 w-16">
+      <span className="w-14 shrink-0 font-mono text-[10px] text-muted-foreground tabular sm:w-16 sm:text-[11px]">
         {task.identifier}
       </span>
       <span className="flex-1 text-sm text-foreground truncate">

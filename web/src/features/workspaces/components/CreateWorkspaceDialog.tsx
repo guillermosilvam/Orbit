@@ -55,10 +55,10 @@ export function CreateWorkspaceDialog({ open, onClose }: Props) {
           id="create-workspace-title"
           className="text-lg font-semibold text-foreground mb-1"
         >
-          Nuevo workspace
+          Nuevo espacio de trabajo
         </h2>
         <p className="text-sm text-muted-foreground mb-4">
-          Crea un espacio para tu equipo.
+          Crea un espacio para organizar los proyectos de tu equipo.
         </p>
 
         <form onSubmit={onSubmit} className="flex flex-col gap-4" noValidate>
