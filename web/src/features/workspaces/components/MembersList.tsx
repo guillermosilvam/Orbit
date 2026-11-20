@@ -3,6 +3,7 @@ import type { WorkspaceMemberResponseDto } from "@orbit/shared/types/responses";
 import type { WorkspaceRole } from "@orbit/shared/schemas/workspace.schema";
 import { useUpdateMemberRole } from "../hooks/use-update-member-role";
 import { useRemoveMember } from "../hooks/use-remove-member";
+import { IconButton } from "../../../shared/ui/IconButton";
 
 type Props = {
   members: WorkspaceMemberResponseDto[];
@@ -11,14 +12,6 @@ type Props = {
   currentUserRole: WorkspaceRole;
 };
 
-/**
- * Lista de miembros con acciones inline.
- *
- * Reglas de UI (el backend valida igual, esto es solo UX):
- * - Cambiar rol: solo owner/admin, no a sí mismo, no al owner.
- * - Quitar: solo owner/admin, no a sí mismo, no al owner.
- * - El badge de rol del owner se muestra siempre como texto, no editable.
- */
 export function MembersList({
   members,
   workspaceSlug,
@@ -84,19 +77,18 @@ export function MembersList({
             )}
 
             {canRemove ? (
-              <button
-                type="button"
+              <IconButton
+                variant="danger"
+                aria-label={`Quitar a ${member.user.name}`}
                 onClick={() => {
                   if (confirm(`¿Quitar a ${member.user.name} del workspace?`)) {
                     remove.mutate(member.userId);
                   }
                 }}
                 disabled={remove.isPending}
-                className="text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50"
-                aria-label={`Quitar a ${member.user.name}`}
               >
                 <Trash2 className="size-4" />
-              </button>
+              </IconButton>
             ) : (
               <div className="size-4" aria-hidden />
             )}

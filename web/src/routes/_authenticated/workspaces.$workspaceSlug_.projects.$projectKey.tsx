@@ -8,6 +8,8 @@ import { KanbanBoard } from "../../features/tasks/components/KanbanBoard";
 import { CreateTaskDialog } from "../../features/tasks/components/CreateTaskDialog";
 import { TaskDetailDrawer } from "../../features/tasks/components/TaskDetailDrawer";
 import { Button } from "../../shared/ui/Button";
+import { BackButton } from "../../shared/ui/BackButton";
+import { Plus } from "lucide-react";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/projects/$projectKey",
@@ -49,7 +51,13 @@ function ProjectDetailPage() {
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
-      <header className="flex items-end justify-between mb-6">
+      <BackButton
+        to="/workspaces/$workspaceSlug"
+        params={{ workspaceSlug }}
+        label="Volver al workspace"
+        className="mb-4"
+      />
+      <header className="flex items-end justify-between mb-6 gap-4">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
             {workspaceSlug} · {project.data.key}
@@ -63,7 +71,10 @@ function ProjectDetailPage() {
             </p>
           )}
         </div>
-        <Button onClick={() => setCreateOpen(true)}>Nueva tarea</Button>
+        <Button onClick={() => setCreateOpen(true)}>
+          <Plus className="size-4" />
+          Nueva tarea
+        </Button>
       </header>
 
       {/* Tabs */}

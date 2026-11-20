@@ -6,6 +6,7 @@ import { useInvitations } from "../../features/invitations/hooks/use-invitations
 import { InvitationsList } from "../../features/invitations/components/InvitationsList";
 import { CreateInvitationDialog } from "../../features/invitations/components/CreateInvitationDialog";
 import { Button } from "../../shared/ui/Button";
+import { BackButton } from "../../shared/ui/BackButton";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/invitations",
@@ -48,13 +49,12 @@ function InvitationsPage() {
   if (!canManage) {
     return (
       <div className="p-8 max-w-3xl mx-auto">
-        <Link
+        <BackButton
           to="/workspaces/$workspaceSlug"
           params={{ workspaceSlug }}
-          className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4"
-        >
-          <ArrowLeft className="size-3.5" /> Volver
-        </Link>
+          label="Volver al workspace"
+          className="mb-4"
+        />
         <h1 className="text-2xl font-semibold text-foreground">Sin acceso</h1>
         <p className="text-sm text-muted-foreground mt-2">
           Solo owners y admins pueden gestionar invitaciones.

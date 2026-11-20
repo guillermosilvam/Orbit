@@ -5,6 +5,9 @@ import { useProjects } from "../../features/projects/hooks/use-projects";
 import { ProjectCard } from "../../features/projects/components/ProjectCard";
 import { CreateProjectDialog } from "../../features/projects/components/CreateProjectDialog";
 import { Button } from "../../shared/ui/Button";
+import { Link } from "@tanstack/react-router";
+import { Plus, UserPlus, Users } from "lucide-react";
+import { IconButton } from "../../shared/ui/IconButton";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug",
@@ -46,10 +49,11 @@ function WorkspaceDetailPage() {
   }
 
   const canCreate = workspace.role === "owner" || workspace.role === "admin";
+  const canManage = workspace.role === "owner" || workspace.role === "admin";
 
   return (
     <div className="p-8 max-w-5xl mx-auto">
-      <header className="flex items-end justify-between mb-6">
+      <header className="flex items-end justify-between mb-6 gap-4">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
             Workspace · {workspace.role}
@@ -61,9 +65,33 @@ function WorkspaceDetailPage() {
             /{workspace.slug}
           </p>
         </div>
-        {canCreate && (
-          <Button onClick={() => setCreateOpen(true)}>Nuevo proyecto</Button>
-        )}
+
+        <div className="flex items-center gap-1">
+          <Link
+            to="/workspaces/$workspaceSlug/members"
+            params={{ workspaceSlug }}
+          >
+            <IconButton aria-label="Ver miembros">
+              <Users className="size-4" />
+            </IconButton>
+          </Link>
+          {canManage && (
+            <Link
+              to="/workspaces/$workspaceSlug/invitations"
+              params={{ workspaceSlug }}
+            >
+              <IconButton aria-label="Invitaciones">
+                <UserPlus className="size-4" />
+              </IconButton>
+            </Link>
+          )}
+          {canManage && (
+            <Button onClick={() => setCreateOpen(true)} className="ml-2">
+              <Plus className="size-4" />
+              Nuevo proyecto
+            </Button>
+          )}
+        </div>
       </header>
 
       {loadingProjects && (

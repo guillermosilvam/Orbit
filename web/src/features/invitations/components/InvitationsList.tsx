@@ -1,6 +1,7 @@
 import { Clock, Trash2 } from "lucide-react";
 import type { InvitationListItemDto } from "@orbit/shared/types/responses";
 import { useRevokeInvitation } from "../hooks/use-revoke-invitation";
+import { IconButton } from "../../../shared/ui/IconButton";
 
 type Props = {
   invitations: InvitationListItemDto[];
@@ -58,8 +59,9 @@ export function InvitationsList({ invitations, workspaceSlug }: Props) {
             </p>
           </div>
 
-          <button
-            type="button"
+          <IconButton
+            variant="danger"
+            aria-label="Revocar invitación"
             onClick={() => {
               if (
                 confirm(
@@ -70,11 +72,9 @@ export function InvitationsList({ invitations, workspaceSlug }: Props) {
               }
             }}
             disabled={revoke.isPending}
-            className="text-muted-foreground hover:text-destructive transition-colors disabled:opacity-50 p-1 -m-1"
-            aria-label="Revocar invitación"
           >
             <Trash2 className="size-4" />
-          </button>
+          </IconButton>
         </div>
       ))}
     </div>

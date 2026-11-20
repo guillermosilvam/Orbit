@@ -4,19 +4,17 @@ import { Plus, Users, UserPlus } from "lucide-react";
 import { useWorkspaces } from "../hooks/use-workspaces";
 import { useProjects } from "../../projects/hooks/use-projects";
 import { CreateProjectDialog } from "../../projects/components/CreateProjectDialog";
+import { SidebarFooter } from "./SidebarFooter";
+import { IconButton } from "../../../shared/ui/IconButton";
 
-/**
- * Sidebar (240px). Muestra:
- * - Logo clickeable a "/".
- * - Workspace actual (si hay).
- * - Lista de proyectos con link a cada uno.
- * - Link a "Miembros".
- * - Botón "+" para crear proyecto (solo owner/admin).
- */
-export function AppSidebar() {
+export function AppSidebar({
+  user,
+}: {
+  user: { id: string; email: string; name: string; createdAt: string };
+}) {
   const { data: workspaces = [] } = useWorkspaces();
   const match = useMatchRoute();
-  const params = match({ to: "/workspaces/$workspaceSlug" });
+  const params = match({ to: "/workspaces/$workspaceSlug", fuzzy: true });
   const currentSlug = params ? params.workspaceSlug : undefined;
   const current = currentSlug
     ? workspaces.find((w) => w.slug === currentSlug)
@@ -31,38 +29,36 @@ export function AppSidebar() {
   return (
     <>
       <aside className="w-60 bg-sidebar border-r border-border flex flex-col shrink-0">
-        <div className="p-4 border-b border-border">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-2"
-            aria-label="Ir al inicio"
+        <Link
+          to="/"
+          className="p-4 border-b border-border flex items-center gap-2 shrink-0"
+          aria-label="Ir al inicio"
+        >
+          <svg
+            className="text-primary"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            aria-hidden
           >
-            <svg
-              className="text-primary"
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              aria-hidden
-            >
-              <circle
-                cx="12"
-                cy="12"
-                r="9"
-                stroke="currentColor"
-                strokeWidth="1.5"
-                strokeDasharray="2 2"
-              />
-              <circle cx="12" cy="12" r="3.5" fill="currentColor" />
-              <circle cx="19" cy="8" r="1.5" fill="var(--status-in-progress)" />
-            </svg>
-            <span className="text-lg font-semibold tracking-tight text-foreground">
-              Orbit
-            </span>
-          </Link>
-        </div>
+            <circle
+              cx="12"
+              cy="12"
+              r="9"
+              stroke="currentColor"
+              strokeWidth="1.5"
+              strokeDasharray="2 2"
+            />
+            <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+            <circle cx="19" cy="8" r="1.5" fill="var(--status-in-progress)" />
+          </svg>
+          <span className="text-lg font-semibold tracking-tight text-foreground">
+            Orbit
+          </span>
+        </Link>
 
-        <div className="p-4 flex-1 overflow-auto">
+        <div className="flex-1 overflow-auto p-4">
           {current ? (
             <>
               <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
@@ -81,14 +77,13 @@ export function AppSidebar() {
                     Proyectos
                   </p>
                   {canManage && (
-                    <button
-                      type="button"
-                      onClick={() => setCreateOpen(true)}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
+                    <IconButton
+                      size="sm"
                       aria-label="Crear proyecto"
+                      onClick={() => setCreateOpen(true)}
                     >
                       <Plus className="size-3.5" />
-                    </button>
+                    </IconButton>
                   )}
                 </div>
 
@@ -98,22 +93,18 @@ export function AppSidebar() {
                   <ul className="space-y-0.5">
                     {projects.map((p) => (
                       <li key={p.id}>
-                        <Link
+                        <SidebarLink
                           to="/workspaces/$workspaceSlug/projects/$projectKey"
                           params={{
                             workspaceSlug: current.slug,
                             projectKey: p.key,
-                          }}
-                          className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                          activeProps={{
-                            className: "bg-accent text-foreground",
                           }}
                         >
                           <span className="font-mono text-[10px] text-muted-foreground">
                             {p.key}
                           </span>
                           <span className="truncate">{p.name}</span>
-                        </Link>
+                        </SidebarLink>
                       </li>
                     ))}
                   </ul>
@@ -126,27 +117,23 @@ export function AppSidebar() {
                 </p>
                 <ul className="space-y-0.5">
                   <li>
-                    <Link
+                    <SidebarLink
                       to="/workspaces/$workspaceSlug/members"
                       params={{ workspaceSlug: current.slug }}
-                      className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                      activeProps={{ className: "bg-accent text-foreground" }}
                     >
                       <Users className="size-3.5" />
                       <span>Miembros</span>
-                    </Link>
+                    </SidebarLink>
                   </li>
                   {canManage && (
                     <li>
-                      <Link
+                      <SidebarLink
                         to="/workspaces/$workspaceSlug/invitations"
                         params={{ workspaceSlug: current.slug }}
-                        className="flex items-center gap-2 px-2 py-1.5 text-sm text-muted-foreground hover:bg-accent hover:text-foreground transition-colors"
-                        activeProps={{ className: "bg-accent text-foreground" }}
                       >
                         <UserPlus className="size-3.5" />
                         <span>Invitaciones</span>
-                      </Link>
+                      </SidebarLink>
                     </li>
                   )}
                 </ul>
@@ -158,6 +145,8 @@ export function AppSidebar() {
             </p>
           )}
         </div>
+
+        <SidebarFooter user={user} />
       </aside>
 
       {currentSlug && (
@@ -168,5 +157,33 @@ export function AppSidebar() {
         />
       )}
     </>
+  );
+}
+
+
+function SidebarLink({
+  to,
+  params,
+  children,
+}: {
+  to: string;
+  params: Record<string, string>;
+  children: React.ReactNode;
+}) {
+  const match = useMatchRoute();
+  const isActive = Boolean(match({ to, params, fuzzy: true }));
+
+  return (
+    <Link
+      to={to}
+      params={params}
+      className={`flex items-center gap-2 px-2 py-1.5 text-sm transition-colors ${
+        isActive
+          ? "text-foreground border-l-[2.5px] border-l-primary"
+          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+      }`}
+    >
+      {children}
+    </Link>
   );
 }

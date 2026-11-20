@@ -3,7 +3,6 @@ import { CSS } from "@dnd-kit/utilities";
 import type { TaskResponseDto } from "@orbit/shared/types/responses";
 import { TaskPriorityBadge } from "./TaskPriorityBadge";
 
-
 export function KanbanCard({
   task,
   isOverlay = false,
@@ -26,8 +25,14 @@ function SortableCard({
   task: TaskResponseDto;
   onClick?: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: task.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: task.id });
 
   return (
     <div
@@ -40,7 +45,7 @@ function SortableCard({
       {...attributes}
       {...listeners}
       onClick={onClick}
-      className="cursor-grab active:cursor-grabbing touch-none"
+      className="group cursor-grab active:cursor-grabbing touch-none"
     >
       <CardBody task={task} />
     </div>
@@ -49,7 +54,7 @@ function SortableCard({
 
 function CardBody({ task }: { task: TaskResponseDto }) {
   return (
-    <div className="border border-border bg-card p-3 flex flex-col gap-2">
+    <div className="border border-border bg-card p-3 flex flex-col gap-2 transition-all duration-150 ease-out motion-reduce:transition-none group-hover:border-primary/40 group-hover:shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <span className="font-mono text-[10px] text-muted-foreground tabular">
           {task.identifier}

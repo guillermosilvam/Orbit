@@ -14,12 +14,13 @@ import type { TaskResponseDto } from "@orbit/shared/types/responses";
 import { Button } from "../../../shared/ui/Button";
 import { Field } from "../../../shared/ui/Field";
 import { Input } from "../../../shared/ui/Input";
-import { Textarea } from "../../../shared/ui/TextArea";
+import { Textarea } from "../../../shared/ui/Textarea";
 import { TaskStatusBadge } from "./TaskStatusBadge";
 import { useUpdateTaskFields } from "../hooks/use-update-task-fields";
 import { useDeleteTask } from "../hooks/use-delete-task";
 import { ApiError } from "../../../shared/lib/api-client";
 import { z } from "zod";
+import { IconButton } from "../../../shared/ui/IconButton";
 
 const drawerFormSchema = updateTaskSchema.omit({ position: true });
 type DrawerFormData = z.infer<typeof drawerFormSchema>;
@@ -30,7 +31,6 @@ type Props = {
   workspaceSlug: string;
   projectKey: string;
 };
-
 
 export function TaskDetailDrawer({
   task,
@@ -106,7 +106,7 @@ export function TaskDetailDrawer({
 
       {/* Drawer */}
       <aside
-        className="fixed right-0 top-0 bottom-0 w-full max-w-140 z-50 bg-card border-l border-border flex flex-col"
+        className="fixed right-0 top-0 bottom-0 w-full max-w-140 z-50 bg-card border-l border-border flex flex-col animate-[slideInRight_200ms_cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none"
         role="dialog"
         aria-modal="true"
         aria-labelledby="task-detail-title"
@@ -118,14 +118,9 @@ export function TaskDetailDrawer({
             </span>
             <TaskStatusBadge status={task.status} />
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="text-muted-foreground hover:text-foreground transition-colors"
-            aria-label="Cerrar"
-          >
+          <IconButton aria-label="Cerrar" onClick={onClose}>
             <X className="size-4" />
-          </button>
+          </IconButton>
         </header>
 
         <form

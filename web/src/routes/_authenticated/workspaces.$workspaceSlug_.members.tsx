@@ -4,6 +4,7 @@ import { useMembers } from "../../features/workspaces/hooks/use-members";
 import { useLeaveWorkspace } from "../../features/workspaces/hooks/use-leave-workspace";
 import { MembersList } from "../../features/workspaces/components/MembersList";
 import { Button } from "../../shared/ui/Button";
+import { BackButton } from "../../shared/ui/BackButton";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/members",
@@ -49,6 +50,12 @@ function MembersPage() {
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
+      <BackButton
+        to="/workspaces/$workspaceSlug"
+        params={{ workspaceSlug }}
+        label="Volver al workspace"
+        className="mb-4"
+      />
       <header className="flex items-end justify-between mb-6 gap-4">
         <div>
           <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">

@@ -3,22 +3,15 @@ import { cva, type VariantProps } from "class-variance-authority";
 import { Loader2 } from "lucide-react";
 import { cn } from "../lib/cn";
 
-/**
- * Variantes del botón. Renombradas alineadas con shadcn:
- * - `primary`     → acción principal (bg-primary)
- * - `secondary`   → acción secundaria (bg-card + border)
- * - `ghost`       → acción terciaria, sin borde
- * - `destructive` → acción peligrosa (antes "danger")
- *
- * El hover de primary usa --primary-hover (token custom, no estándar de shadcn).
- * El hover de destructive usa opacity-90 para evitar otro token custom.
- */
+
 const buttonVariants = cva(
   [
     "inline-flex items-center justify-center gap-2",
     "font-mono text-xs uppercase tracking-wider",
-    "border transition-colors",
-    "disabled:opacity-50 disabled:cursor-not-allowed",
+    "border transition-all duration-150 ease-out",
+    "motion-reduce:transition-none",
+    "active:scale-[0.98]",
+    "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
     "focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
   ].join(" "),
   {
@@ -26,8 +19,7 @@ const buttonVariants = cva(
       variant: {
         primary:
           "bg-primary text-primary-foreground border-primary hover:bg-primary-hover",
-        secondary:
-          "bg-card text-foreground border-border hover:bg-accent",
+        secondary: "bg-card text-foreground border-border hover:bg-accent",
         ghost:
           "bg-transparent text-foreground border-transparent hover:bg-accent",
         destructive:
