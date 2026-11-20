@@ -6,7 +6,7 @@ import { useInvitations } from "../../features/invitations/hooks/use-invitations
 import { InvitationsList } from "../../features/invitations/components/InvitationsList";
 import { CreateInvitationDialog } from "../../features/invitations/components/CreateInvitationDialog";
 import { Button } from "../../shared/ui/Button";
-import { Breadcrumb } from "../../shared/ui/BreadCrumb";
+import { Breadcrumb } from "../../shared/ui/Breadcrumb";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/invitations",

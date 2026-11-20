@@ -10,7 +10,7 @@ import { KanbanBoard } from "../../features/tasks/components/KanbanBoard";
 import { CreateTaskDialog } from "../../features/tasks/components/CreateTaskDialog";
 import { TaskDetailDrawer } from "../../features/tasks/components/TaskDetailDrawer";
 import { Button } from "../../shared/ui/Button";
-import { Breadcrumb } from "../../shared/ui/BreadCrumb";
+import { Breadcrumb } from "../../shared/ui/Breadcrumb";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/projects/$projectKey",

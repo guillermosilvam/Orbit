@@ -4,7 +4,7 @@ import { useMembers } from "../../features/workspaces/hooks/use-members";
 import { useLeaveWorkspace } from "../../features/workspaces/hooks/use-leave-workspace";
 import { MembersList } from "../../features/workspaces/components/MembersList";
 import { Button } from "../../shared/ui/Button";
-import { Breadcrumb } from "../../shared/ui/BreadCrumb";
+import { Breadcrumb } from "../../shared/ui/Breadcrumb";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/members",
