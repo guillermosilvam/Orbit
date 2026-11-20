@@ -29,34 +29,36 @@ export function AppSidebar({
   return (
     <>
       <aside className="w-60 bg-sidebar border-r border-border flex flex-col shrink-0">
-        <Link
-          to="/"
-          className="p-4 border-b border-border flex items-center gap-2 shrink-0"
-          aria-label="Ir al inicio"
-        >
-          <svg
-            className="text-primary"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            aria-hidden
+        <div className="p-4 border-b border-border ">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-2 shrink-0"
+            aria-label="Ir al inicio"
           >
-            <circle
-              cx="12"
-              cy="12"
-              r="9"
-              stroke="currentColor"
-              strokeWidth="1.5"
-              strokeDasharray="2 2"
-            />
-            <circle cx="12" cy="12" r="3.5" fill="currentColor" />
-            <circle cx="19" cy="8" r="1.5" fill="var(--status-in-progress)" />
-          </svg>
-          <span className="text-lg font-semibold tracking-tight text-foreground">
-            Orbit
-          </span>
-        </Link>
+            <svg
+              className="text-primary"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              aria-hidden
+            >
+              <circle
+                cx="12"
+                cy="12"
+                r="9"
+                stroke="currentColor"
+                strokeWidth="1.5"
+                strokeDasharray="2 2"
+              />
+              <circle cx="12" cy="12" r="3.5" fill="currentColor" />
+              <circle cx="19" cy="8" r="1.5" fill="var(--status-in-progress)" />
+            </svg>
+            <span className="text-lg font-semibold tracking-tight text-foreground">
+              Orbit
+            </span>
+          </Link>
+        </div>
 
         <div className="flex-1 overflow-auto p-4">
           {current ? (
@@ -106,7 +108,7 @@ export function AppSidebar({
               </div>
 
               <div className="mt-6">
-                <p className="section-label mb-2">Workspace</p>
+                <p className="section-label mb-2">Gestion de Equipo</p>
                 <ul className="space-y-0.5">
                   <li>
                     <SidebarLink
