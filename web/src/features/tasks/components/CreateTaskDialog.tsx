@@ -1,4 +1,4 @@
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   createTaskSchema,
@@ -13,6 +13,10 @@ import { Field } from "../../../shared/ui/Field";
 import { Input } from "../../../shared/ui/Input";
 import { useCreateTask } from "../hooks/use-create-task";
 import { ApiError } from "../../../shared/lib/api-client";
+import { useMembers } from "../../workspaces/hooks/use-members";
+import { TaskAssigneeAvatar } from "./TaskAssigneeAvatar";
+import { TaskDatePicker } from "./TaskDatePicker";
+import { SearchableSelect } from "./SearchableSelect";
 
 type Props = {
   open: boolean;
@@ -22,12 +26,7 @@ type Props = {
 };
 
 /**
- * Diálogo de crear tarea. Cinco campos:
- * - title: obligatorio.
- * - description: opcional.
- * - status: select (todo/in_progress/done), default todo.
- * - priority: select (low/medium/high/urgent), default medium.
- * - dueDate: opcional, input date.
+ * Diálogo de crear tarea con estado, prioridad, asignación y fecha límite.
  *
  * El `number` (WEB-12) lo asigna el backend atómicamente; no va en el form.
  */
@@ -44,10 +43,13 @@ export function CreateTaskDialog({
       description: "",
       status: "todo",
       priority: "medium",
+      assigneeId: null,
       dueDate: null,
     },
   });
   const create = useCreateTask(workspaceSlug, projectKey);
+  const membersQuery = useMembers(workspaceSlug);
+  const members = membersQuery.data ?? [];
 
   if (!open) return null;
 
@@ -78,7 +80,7 @@ export function CreateTaskDialog({
       aria-labelledby="create-task-title"
     >
       <div
-        className="bg-card border border-border w-full max-w-lg p-6"
+        className="max-h-[90vh] w-full max-w-lg overflow-y-auto border border-border bg-card p-4 sm:p-6"
         onClick={(e) => e.stopPropagation()}
       >
         <h2
@@ -111,34 +113,46 @@ export function CreateTaskDialog({
             <Input placeholder="Opcional" {...form.register("description")} />
           </Field>
 
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <Field label="Estado" error={form.formState.errors.status?.message}>
-              <select
-                className="h-10 w-full border border-border bg-card px-3 font-sans text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring"
-                {...form.register("status")}
-              >
-                {TASK_STATUSES.map((s) => (
-                  <option key={s} value={s}>
-                    {statusLabel(s)}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <SearchableSelect
+                    label="Estado"
+                    value={field.value ?? "todo"}
+                    options={TASK_STATUSES.map((status) => ({
+                      value: status,
+                      label: statusLabel(status),
+                    }))}
+                    onChange={field.onChange}
+                    className="w-full [&>button]:w-full"
+                  />
+                )}
+              />
             </Field>
 
             <Field
               label="Prioridad"
               error={form.formState.errors.priority?.message}
             >
-              <select
-                className="h-10 w-full border border-border bg-card px-3 font-sans text-sm text-foreground focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring"
-                {...form.register("priority")}
-              >
-                {TASK_PRIORITIES.map((p) => (
-                  <option key={p} value={p}>
-                    {priorityLabel(p)}
-                  </option>
-                ))}
-              </select>
+              <Controller
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <SearchableSelect
+                    label="Prioridad"
+                    value={field.value ?? "medium"}
+                    options={TASK_PRIORITIES.map((priority) => ({
+                      value: priority,
+                      label: priorityLabel(priority),
+                    }))}
+                    onChange={field.onChange}
+                    className="w-full [&>button]:w-full"
+                  />
+                )}
+              />
             </Field>
           </div>
 
@@ -146,13 +160,57 @@ export function CreateTaskDialog({
             label="Fecha límite"
             error={form.formState.errors.dueDate?.message}
           >
-            <Input
-              type="date"
-              {...form.register("dueDate", {
-                setValueAs: (v: string) =>
-                  v === "" ? null : new Date(v).toISOString(),
-              })}
+            <Controller
+              control={form.control}
+              name="dueDate"
+              render={({ field }) => (
+                <TaskDatePicker
+                  label="Fecha límite"
+                  value={field.value ?? null}
+                  onChange={field.onChange}
+                />
+              )}
             />
+          </Field>
+
+          <Field
+            label="Asignado a"
+            error={form.formState.errors.assigneeId?.message}
+          >
+            <Controller
+              control={form.control}
+              name="assigneeId"
+              render={({ field }) => (
+                <SearchableSelect
+                  label="Asignado a"
+                  value={field.value ?? ""}
+                  options={[
+                    {
+                      value: "",
+                      label: "Sin asignar",
+                      leading: <TaskAssigneeAvatar />,
+                    },
+                    ...members.map((member) => ({
+                      value: member.userId,
+                      label: member.user.name,
+                      searchText: member.user.email,
+                      leading: (
+                        <TaskAssigneeAvatar member={member} size="sm" />
+                      ),
+                    })),
+                  ]}
+                  onChange={(value) => field.onChange(value || null)}
+                  searchPlaceholder="Buscar persona…"
+                  disabled={membersQuery.isLoading}
+                  className="w-full [&>button]:w-full"
+                />
+              )}
+            />
+            {membersQuery.isError && (
+              <p role="alert" className="mt-1 text-xs text-destructive">
+                No se pudieron cargar las personas del espacio de trabajo.
+              </p>
+            )}
           </Field>
 
           {serverError && (

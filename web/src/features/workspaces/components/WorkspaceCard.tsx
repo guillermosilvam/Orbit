@@ -14,6 +14,7 @@ export function WorkspaceCard({
     <Link
       to="/workspaces/$workspaceSlug"
       params={{ workspaceSlug: workspace.slug }}
+      search={{ view: "projects" }}
       className="group flex flex-col gap-4 border border-border bg-card p-5 transition-colors hover:border-primary/40 hover:bg-accent"
     >
       <div className="flex items-start justify-between gap-3">

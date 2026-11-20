@@ -5,8 +5,21 @@ import type { TaskResponseDto } from "@orbit/shared/types/responses";
 import { useProject } from "../../features/tasks/hooks/use-project";
 import { useTasks } from "../../features/tasks/hooks/use-tasks";
 import { useWorkspaces } from "../../features/workspaces/hooks/use-workspaces";
+import { useMembers } from "../../features/workspaces/hooks/use-members";
+import {
+  type TaskPriority,
+} from "@orbit/shared/schemas/task.schema";
+import {
+  matchesDueDateFilter,
+  type DueDateFilter,
+} from "../../features/tasks/lib/task-dates";
 import { TaskList } from "../../features/tasks/components/TaskList";
 import { KanbanBoard } from "../../features/tasks/components/KanbanBoard";
+import {
+  TaskFilters,
+  type TaskGroupBy,
+} from "../../features/tasks/components/TaskFilters";
+import { TaskProgress } from "../../features/tasks/components/TaskProgress";
 import { CreateTaskDialog } from "../../features/tasks/components/CreateTaskDialog";
 import { TaskDetailDrawer } from "../../features/tasks/components/TaskDetailDrawer";
 import { Button } from "../../shared/ui/Button";
@@ -26,13 +39,41 @@ function ProjectDetailPage() {
   const project = useProject(workspaceSlug, projectKey);
   const tasks = useTasks(workspaceSlug, projectKey);
   const { data: workspaces = [] } = useWorkspaces();
+  const membersQuery = useMembers(workspaceSlug);
+  const members = membersQuery.data ?? [];
   const [createOpen, setCreateOpen] = useState(false);
   const [tab, setTab] = useState<Tab>("list");
+  const [priorityFilter, setPriorityFilter] =
+    useState<TaskPriority | "all">("all");
+  const [assigneeFilter, setAssigneeFilter] = useState("all");
+  const [dueDateFilter, setDueDateFilter] = useState<DueDateFilter>("all");
+  const [groupBy, setGroupBy] = useState<TaskGroupBy>("status");
   const [selectedTask, setSelectedTask] = useState<TaskResponseDto | null>(
     null,
   );
 
   const workspace = workspaces.find((w) => w.slug === workspaceSlug);
+  const taskList = tasks.data;
+  const filteredTasks = taskList?.filter((task) => {
+    const matchesPriority =
+      priorityFilter === "all" || task.priority === priorityFilter;
+    const matchesAssignee =
+      assigneeFilter === "all" ||
+      (assigneeFilter === "unassigned"
+        ? !task.assigneeId
+        : task.assigneeId === assigneeFilter);
+    return (
+      matchesPriority &&
+      matchesAssignee &&
+      matchesDueDateFilter(task.dueDate, task.status, dueDateFilter)
+    );
+  });
+
+  const resetFilters = () => {
+    setPriorityFilter("all");
+    setAssigneeFilter("all");
+    setDueDateFilter("all");
+  };
 
   if (project.isLoading) {
     return (
@@ -62,8 +103,6 @@ function ProjectDetailPage() {
       </div>
     );
   }
-
-  const taskList = tasks.data;
 
   return (
     <div className="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">
@@ -104,6 +143,8 @@ function ProjectDetailPage() {
         </Button>
       </header>
 
+      {taskList && <TaskProgress tasks={taskList} />}
+
       <div className="mb-4 flex gap-0 border-b border-border">
         <TabButton active={tab === "list"} onClick={() => setTab("list")}>
           Lista
@@ -113,26 +154,70 @@ function ProjectDetailPage() {
         </TabButton>
       </div>
 
+      {taskList && (
+        <TaskFilters
+          members={members}
+          membersLoading={membersQuery.isLoading}
+          priority={priorityFilter}
+          assigneeId={assigneeFilter}
+          dueDate={dueDateFilter}
+          groupBy={groupBy}
+          showGrouping={tab === "list"}
+          onPriorityChange={setPriorityFilter}
+          onAssigneeChange={setAssigneeFilter}
+          onDueDateChange={setDueDateFilter}
+          onGroupByChange={setGroupBy}
+        />
+      )}
+
+      {tasks.isError && (
+        <p role="alert" className="mb-4 text-sm text-destructive">
+          No se pudieron cargar las tareas.{" "}
+          {tasks.error instanceof Error ? tasks.error.message : ""}
+        </p>
+      )}
+      {membersQuery.isError && (
+        <p role="alert" className="mb-4 text-xs text-destructive">
+          No se pudieron cargar los miembros; algunos nombres y avatares pueden
+          no aparecer.
+        </p>
+      )}
+
       {tasks.isLoading ? (
         tab === "board" ? <BoardSkeleton /> : <TaskListSkeleton />
-      ) : (
-        taskList &&
-        (tab === "list" ? (
+      ) : taskList && filteredTasks?.length === 0 && taskList.length > 0 ? (
+        <div className="border border-border bg-card px-5 py-10 text-center">
+          <p className="text-sm text-muted-foreground">
+            Ninguna tarea coincide con estos filtros.
+          </p>
+          <button
+            type="button"
+            onClick={resetFilters}
+            className="mt-3 text-sm font-medium text-primary hover:underline"
+          >
+            Limpiar filtros
+          </button>
+        </div>
+      ) : taskList && filteredTasks ? (
+        tab === "list" ? (
           <TaskList
-            tasks={taskList}
+            tasks={filteredTasks}
+            members={members}
+            groupBy={groupBy}
             workspaceSlug={workspaceSlug}
             projectKey={projectKey}
             onSelectTask={setSelectedTask}
           />
         ) : (
           <KanbanBoard
-            tasks={taskList}
+            tasks={filteredTasks}
+            members={members}
             workspaceSlug={workspaceSlug}
             projectKey={projectKey}
             onSelectTask={setSelectedTask}
           />
-        ))
-      )}
+        )
+      ) : null}
 
       <CreateTaskDialog
         open={createOpen}

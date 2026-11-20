@@ -9,15 +9,22 @@ import { Button } from "../../shared/ui/Button";
 import { IconButton } from "../../shared/ui/IconButton";
 import { Skeleton } from "../../shared/ui/Skeleton";
 import { formatWorkspaceRole } from "../../features/workspaces/lib/format-role";
+import { z } from "zod";
+import { MyTasksView } from "../../features/tasks/components/MyTasksView";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug",
 )({
+  validateSearch: z.object({
+    view: z.enum(["projects", "my-tasks"]).optional(),
+  }),
   component: WorkspaceDetailPage,
 });
 
 function WorkspaceDetailPage() {
   const { workspaceSlug } = Route.useParams();
+  const { view } = Route.useSearch();
+  const { auth } = Route.useRouteContext();
   const { data: workspaces = [], isLoading: loadingWorkspaces } =
     useWorkspaces();
   const { data: projects = [], isLoading: loadingProjects } =
@@ -48,6 +55,18 @@ function WorkspaceDetailPage() {
   }
 
   const canManage = workspace.role === "owner" || workspace.role === "admin";
+
+  if (view === "my-tasks" && auth.user) {
+    return (
+      <div className="mx-auto w-full max-w-4xl p-4 sm:p-6 lg:p-8">
+        <MyTasksView
+          workspaceSlug={workspaceSlug}
+          workspaceName={workspace.name}
+          userId={auth.user.id}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto w-full max-w-6xl p-4 sm:p-6 lg:p-8">

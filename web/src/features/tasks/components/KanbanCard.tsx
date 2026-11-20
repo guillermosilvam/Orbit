@@ -1,29 +1,36 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import type { TaskResponseDto } from "@orbit/shared/types/responses";
+import type { WorkspaceMemberResponseDto } from "@orbit/shared/types/responses";
 import { TaskPriorityBadge } from "./TaskPriorityBadge";
+import { TaskAssigneeAvatar } from "./TaskAssigneeAvatar";
+import { DueDateBadge } from "./DueDateBadge";
 
 export function KanbanCard({
   task,
   isOverlay = false,
   onClick,
+  members = [],
 }: {
   task: TaskResponseDto;
   isOverlay?: boolean;
   onClick?: () => void;
+  members?: WorkspaceMemberResponseDto[];
 }) {
   if (isOverlay) {
-    return <CardBody task={task} />;
+    return <CardBody task={task} members={members} />;
   }
-  return <SortableCard task={task} onClick={onClick} />;
+  return <SortableCard task={task} onClick={onClick} members={members} />;
 }
 
 function SortableCard({
   task,
   onClick,
+  members,
 }: {
   task: TaskResponseDto;
   onClick?: () => void;
+  members: WorkspaceMemberResponseDto[];
 }) {
   const {
     attributes,
@@ -47,14 +54,22 @@ function SortableCard({
       onClick={onClick}
       className="group cursor-grab active:cursor-grabbing touch-none"
     >
-      <CardBody task={task} />
+      <CardBody task={task} members={members} />
     </div>
   );
 }
 
-function CardBody({ task }: { task: TaskResponseDto }) {
+function CardBody({
+  task,
+  members,
+}: {
+  task: TaskResponseDto;
+  members: WorkspaceMemberResponseDto[];
+}) {
+  const member = members.find((item) => item.userId === task.assigneeId);
+
   return (
-    <div className="border border-border bg-card p-3 flex flex-col gap-2 transition-all duration-150 ease-out motion-reduce:transition-none group-hover:border-primary/40 group-hover:shadow-sm">
+    <div className="flex flex-col gap-2 border border-border bg-card p-3 transition-all duration-150 ease-out motion-reduce:transition-none group-hover:border-primary/40 group-hover:shadow-sm">
       <div className="flex items-start justify-between gap-2">
         <span className="font-mono text-[10px] text-muted-foreground tabular">
           {task.identifier}
@@ -62,6 +77,14 @@ function CardBody({ task }: { task: TaskResponseDto }) {
         <TaskPriorityBadge priority={task.priority} />
       </div>
       <p className="text-sm text-foreground line-clamp-2">{task.title}</p>
+      <div className="flex min-h-6 items-center justify-between gap-2">
+        <TaskAssigneeAvatar
+          member={member}
+          assigned={Boolean(task.assigneeId)}
+          size="sm"
+        />
+        <DueDateBadge dueDate={task.dueDate} status={task.status} compact />
+      </div>
     </div>
   );
 }

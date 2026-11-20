@@ -14,6 +14,7 @@ import {
   type TaskStatus,
 } from "@orbit/shared/schemas/task.schema";
 import type { TaskResponseDto } from "@orbit/shared/types/responses";
+import type { WorkspaceMemberResponseDto } from "@orbit/shared/types/responses";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanCard } from "./KanbanCard";
 import { useUpdateTask } from "../hooks/use-update-task";
@@ -25,11 +26,13 @@ export function KanbanBoard({
   workspaceSlug,
   projectKey,
   onSelectTask,
+  members = [],
 }: {
   tasks: TaskResponseDto[];
   workspaceSlug: string;
   projectKey: string;
   onSelectTask: (task: TaskResponseDto) => void;
+  members?: WorkspaceMemberResponseDto[];
 }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const updateTask = useUpdateTask(workspaceSlug, projectKey);
@@ -113,13 +116,16 @@ export function KanbanBoard({
                 .filter((t) => t.status === status)
                 .sort((a, b) => a.position - b.position)}
               onSelectTask={onSelectTask}
+              members={members}
             />
           ))}
         </div>
       </div>
 
       <DragOverlay>
-        {activeTask ? <KanbanCard task={activeTask} isOverlay /> : null}
+        {activeTask ? (
+          <KanbanCard task={activeTask} isOverlay members={members} />
+        ) : null}
       </DragOverlay>
     </DndContext>
   );

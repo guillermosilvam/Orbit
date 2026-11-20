@@ -4,6 +4,7 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import type { TaskResponseDto } from "@orbit/shared/types/responses";
+import type { WorkspaceMemberResponseDto } from "@orbit/shared/types/responses";
 import type { TaskStatus } from "@orbit/shared/schemas/task.schema";
 import { KanbanCard } from "./KanbanCard";
 import { TaskStatusBadge } from "./TaskStatusBadge";
@@ -12,10 +13,12 @@ export function KanbanColumn({
   status,
   tasks,
   onSelectTask,
+  members,
 }: {
   status: TaskStatus;
   tasks: TaskResponseDto[];
   onSelectTask: (task: TaskResponseDto) => void;
+  members: WorkspaceMemberResponseDto[];
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -42,6 +45,7 @@ export function KanbanColumn({
             <KanbanCard
               key={task.id}
               task={task}
+              members={members}
               onClick={() => onSelectTask(task)}
             />
           ))}

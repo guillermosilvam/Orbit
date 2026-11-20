@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { X, Trash2 } from "lucide-react";
 import {
@@ -21,6 +21,10 @@ import { useDeleteTask } from "../hooks/use-delete-task";
 import { ApiError } from "../../../shared/lib/api-client";
 import { z } from "zod";
 import { IconButton } from "../../../shared/ui/IconButton";
+import { useMembers } from "../../workspaces/hooks/use-members";
+import { TaskAssigneeAvatar } from "./TaskAssigneeAvatar";
+import { TaskDatePicker } from "./TaskDatePicker";
+import { SearchableSelect } from "./SearchableSelect";
 
 const drawerFormSchema = updateTaskSchema.omit({ position: true });
 type DrawerFormData = z.infer<typeof drawerFormSchema>;
@@ -40,6 +44,8 @@ export function TaskDetailDrawer({
 }: Props) {
   const update = useUpdateTaskFields(workspaceSlug, projectKey);
   const remove = useDeleteTask(workspaceSlug, projectKey);
+  const membersQuery = useMembers(workspaceSlug);
+  const members = membersQuery.data ?? [];
 
   const form = useForm<DrawerFormData>({
     resolver: zodResolver(drawerFormSchema),
@@ -48,21 +54,28 @@ export function TaskDetailDrawer({
       description: "",
       status: "todo",
       priority: "medium",
+      assigneeId: null,
       dueDate: null,
     },
   });
+  const currentStatus = useWatch({
+    control: form.control,
+    name: "status",
+  });
+  const { reset } = form;
 
   useEffect(() => {
     if (task) {
-      form.reset({
+      reset({
         title: task.title,
         description: task.description ?? "",
         status: task.status,
         priority: task.priority,
-        dueDate: task.dueDate ? task.dueDate.slice(0, 10) : null,
+        assigneeId: task.assigneeId,
+        dueDate: task.dueDate,
       });
     }
-  }, [task?.id]);
+  }, [reset, task]);
 
   if (!task) return null;
 
@@ -72,7 +85,8 @@ export function TaskDetailDrawer({
       description: data.description?.trim() || null,
       status: data.status,
       priority: data.priority,
-      dueDate: data.dueDate ? new Date(data.dueDate).toISOString() : null,
+      assigneeId: data.assigneeId ?? null,
+      dueDate: data.dueDate ?? null,
     };
     update.mutate(
       { number: task.number, input: payload },
@@ -159,60 +173,132 @@ export function TaskDetailDrawer({
             </Field>
 
             {/* Grid de propiedades tipo hairline */}
-            <div className="border border-border bg-border grid grid-cols-2 gap-px">
+            <div className="grid grid-cols-1 gap-px border border-border bg-border sm:grid-cols-2">
               <div className="bg-card p-3">
-                <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">
+                <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                   Estado
                 </label>
-                <select
-                  className="w-full bg-transparent text-sm text-foreground outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                  {...form.register("status")}
-                >
-                  {TASK_STATUSES.map((s) => (
-                    <option key={s} value={s}>
-                      {statusLabel(s)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="bg-card p-3">
-                <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">
-                  Prioridad
-                </label>
-                <select
-                  className="w-full bg-transparent text-sm text-foreground outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                  {...form.register("priority")}
-                >
-                  {TASK_PRIORITIES.map((p) => (
-                    <option key={p} value={p}>
-                      {priorityLabel(p)}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="bg-card p-3">
-                <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">
-                  Fecha límite
-                </label>
-                <input
-                  type="date"
-                  className="w-full bg-transparent text-sm text-foreground outline-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
-                  {...form.register("dueDate", {
-                    setValueAs: (v: string) => (v === "" ? null : v),
-                  })}
+                <Controller
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <SearchableSelect
+                      label="Estado"
+                      value={field.value ?? "todo"}
+                      options={TASK_STATUSES.map((status) => ({
+                        value: status,
+                        label: statusLabel(status),
+                      }))}
+                      onChange={field.onChange}
+                      className="w-full [&>button]:w-full"
+                    />
+                  )}
                 />
               </div>
 
               <div className="bg-card p-3">
-                <label className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground block mb-1">
+                <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Prioridad
+                </label>
+                <Controller
+                  control={form.control}
+                  name="priority"
+                  render={({ field }) => (
+                    <SearchableSelect
+                      label="Prioridad"
+                      value={field.value ?? "medium"}
+                      options={TASK_PRIORITIES.map((priority) => ({
+                        value: priority,
+                        label: priorityLabel(priority),
+                      }))}
+                      onChange={field.onChange}
+                      className="w-full [&>button]:w-full"
+                    />
+                  )}
+                />
+              </div>
+
+              <div className="bg-card p-3">
+                <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  Fecha límite
+                </label>
+                <Controller
+                  control={form.control}
+                  name="dueDate"
+                  render={({ field }) => (
+                    <TaskDatePicker
+                      label="Fecha límite"
+                      value={field.value ?? null}
+                      onChange={field.onChange}
+                      status={currentStatus}
+                    />
+                  )}
+                />
+              </div>
+
+              <div className="bg-card p-3">
+                <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                   Asignado
                 </label>
-                <p className="text-sm text-muted-foreground">Sin asignar</p>
+                <Controller
+                  control={form.control}
+                  name="assigneeId"
+                  render={({ field }) => {
+                    const assigneeOptions = [
+                      {
+                        value: "",
+                        label: "Sin asignar",
+                        leading: <TaskAssigneeAvatar size="sm" />,
+                      },
+                      ...members.map((member) => ({
+                        value: member.userId,
+                        label: member.user.name,
+                        searchText: member.user.email,
+                        leading: (
+                          <TaskAssigneeAvatar member={member} size="sm" />
+                        ),
+                      })),
+                    ];
+                    if (
+                      task.assigneeId &&
+                      !members.some(
+                        (member) => member.userId === task.assigneeId,
+                      )
+                    ) {
+                      assigneeOptions.push({
+                        value: task.assigneeId,
+                        label: "Usuario asignado",
+                        searchText: "",
+                        leading: (
+                          <TaskAssigneeAvatar
+                            assigned
+                            size="sm"
+                          />
+                        ),
+                      });
+                    }
+
+                    return (
+                      <SearchableSelect
+                        label="Asignado"
+                        value={field.value ?? ""}
+                        options={assigneeOptions}
+                        onChange={(value) => field.onChange(value || null)}
+                        searchPlaceholder="Buscar persona…"
+                        disabled={membersQuery.isLoading}
+                        className="w-full [&>button]:w-full"
+                      />
+                    );
+                  }}
+                />
               </div>
             </div>
 
+            {membersQuery.isError && (
+              <p role="alert" className="text-xs text-destructive">
+                No se pudieron cargar las personas del espacio de trabajo.
+              </p>
+            )}
             {serverError && (
               <p role="alert" className="text-sm text-destructive">
                 {serverError}

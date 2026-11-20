@@ -80,6 +80,7 @@ function RailIcon({
     <Link
       to="/workspaces/$workspaceSlug"
       params={{ workspaceSlug: workspace.slug }}
+      search={{ view: "projects" }}
       className={`relative size-10 bg-card border border-border flex items-center justify-center font-semibold text-sm transition-colors hover:bg-accent ${
         active ? "text-foreground" : "text-muted-foreground"
       }`}
