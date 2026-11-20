@@ -101,6 +101,7 @@ Todas las rutas (salvo `/health`, `/auth/register` y `/auth/login`) piden que el
 * `GET /workspaces` — Listar los workspaces donde participas.
 * `GET /workspaces/:workspaceSlug` — Detalle del workspace (solo miembros).
 * `DELETE /workspaces/:workspaceSlug` — Eliminar workspace (solo `owner`).
+* `GET /workspaces/:workspaceSlug/activity?limit=20` — Actividad reciente de un workspace (máximo 50 eventos; solo miembros).
 * `POST /workspaces/:workspaceSlug/invitations` — Generar invitación (`owner` / `admin`).
 * `GET /workspaces/:workspaceSlug/invitations` — Ver invitaciones pendientes (`owner` / `admin`).
 * `DELETE /workspaces/:workspaceSlug/invitations/:id` — Cancelar invitación (`owner` / `admin`).

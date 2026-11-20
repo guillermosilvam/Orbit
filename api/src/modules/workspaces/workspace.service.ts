@@ -12,6 +12,7 @@ import {
     type WorkspaceMemberResponseDto
 } from "./dto/workspace.dto";
 import { AppError } from "../../errors/app-error";
+import { recordActivity } from "../activity/activity.service.ts";
 
 
 
@@ -41,6 +42,12 @@ export class WorkspaceService {
                 role: "owner"
             })
             await manager.save(membership);
+
+            await recordActivity(manager, {
+                workspaceId: workspace.id,
+                actorId: ownerId,
+                type: "workspace_created",
+            });
 
             return toWorkspaceResponseDto(workspace)
         })

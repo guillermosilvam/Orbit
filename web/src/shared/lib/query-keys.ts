@@ -2,6 +2,11 @@ export const queryKeys = {
   auth: {
     me: ["auth", "me"] as const,
   },
+  activity: {
+    all: ["activity"] as const,
+    recent: (workspaceSlug: string, limit: number) =>
+      [...queryKeys.activity.all, "recent", workspaceSlug, limit] as const,
+  },
   workspaces: {
     all: ["workspaces"] as const,
     list: () => [...queryKeys.workspaces.all, "list"] as const,

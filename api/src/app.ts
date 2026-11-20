@@ -29,6 +29,9 @@ import { InvitationController } from "./modules/invitations/invitation.controlle
 import { InvitationAcceptController } from "./modules/invitations/invitation-accept.controller.ts";
 import { createInvitationRouter } from "./modules/invitations/invitation.routes.ts";
 import { createInvitationAcceptRouter } from "./modules/invitations/invitation-accept.routes.ts";
+import { ActivityService } from "./modules/activity/activity.service.ts";
+import { ActivityController } from "./modules/activity/activity.controller.ts";
+import { createActivityRouter } from "./modules/activity/activity.routes.ts";
 
 export const createApp = (dataSource: DataSource) => {
     const app = express()
@@ -57,6 +60,17 @@ export const createApp = (dataSource: DataSource) => {
     // -- AUTH ----------------------------------------------
     const authController = new AuthController(authService);
     app.use("/auth", createAuthRouter(authController, requireAuth));
+
+    // -- ACTIVITY -------------------------------------------
+    const activityController = new ActivityController(
+        new ActivityService(dataSource),
+    );
+    app.use(
+        "/workspaces/:workspaceSlug/activity",
+        requireAuth,
+        requireWorkspaceMember,
+        createActivityRouter(activityController),
+    );
 
     // -- TASKS ---------------------------------------------
     const taskService = new TaskService(dataSource);

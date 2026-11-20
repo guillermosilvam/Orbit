@@ -15,9 +15,9 @@ export class TaskController {
   constructor(private readonly taskService: TaskService) {}
 
   create = async (req: Request, res: Response): Promise<void> => {
-    if (!req.project) throw AppError.unauthorized();
+    if (!req.project || !req.user) throw AppError.unauthorized();
     const input = createTaskSchema.parse(req.body);
-    const task = await this.taskService.create(req.project, input);
+    const task = await this.taskService.create(req.project, input, req.user.id);
     res.status(201).json({ task });
   };
 
@@ -44,14 +44,16 @@ export class TaskController {
   };
 
   update = async (req: Request, res: Response): Promise<void> => {
-    if (!req.project) throw AppError.unauthorized();
+    if (!req.project || !req.user) throw AppError.unauthorized();
     const number = parseTaskNumber(req.params.taskNumber);
     const input = updateTaskSchema.parse(req.body);
     const task = await this.taskService.update(
       req.project.id,
+      req.project.workspaceId,
       req.project.key,
       number,
       input,
+      req.user.id,
     );
     res.json({ task });
   };

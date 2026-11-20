@@ -7,9 +7,13 @@ export class ProjectController {
     constructor(private readonly projectService: ProjectService) { }
 
     create = async (req: Request, res: Response): Promise<void> => {
-        if (!req.workspace) throw AppError.unauthorized();
+        if (!req.workspace || !req.user) throw AppError.unauthorized();
         const input = createProjectSchema.parse(req.body);
-        const project = await this.projectService.create(req.workspace.id, input);
+        const project = await this.projectService.create(
+            req.workspace.id,
+            req.user.id,
+            input,
+        );
         res.status(201).json({ project });
     }
 

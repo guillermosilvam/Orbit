@@ -13,12 +13,13 @@ import { ConfirmDialog } from "../../shared/ui/ConfirmDialog";
 import { formatWorkspaceRole } from "../../features/workspaces/lib/format-role";
 import { z } from "zod";
 import { MyTasksView } from "../../features/tasks/components/MyTasksView";
+import { ActivityFeed } from "../../features/activity/components/ActivityFeed";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug",
 )({
   validateSearch: z.object({
-    view: z.enum(["projects", "my-tasks"]).optional(),
+    view: z.enum(["projects", "my-tasks", "activity"]).optional(),
   }),
   component: WorkspaceDetailPage,
 });
@@ -118,35 +119,45 @@ function WorkspaceDetailPage() {
         </div>
       </header>
 
-      {loadingProjects && (
-        <div role="status" aria-label="Cargando proyectos">
-          <ProjectCardsSkeleton />
-        </div>
-      )}
-
-      {!loadingProjects && projects.length === 0 && (
-        <div className="border border-border bg-card px-5 py-12 text-center sm:px-12">
-          <h2 className="text-lg font-semibold text-foreground">
-            Aún no hay proyectos
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1 mb-6">
-            Los proyectos agrupan las tareas de un área de trabajo.
-          </p>
-          {canManage && (
-            <Button onClick={() => setCreateOpen(true)}>
-              <Plus className="size-4" />
-              Crear mi primer proyecto
-            </Button>
+      {view === "activity" ? (
+        <ActivityFeed workspaceSlug={workspaceSlug} />
+      ) : (
+        <>
+          {loadingProjects && (
+            <div role="status" aria-label="Cargando proyectos">
+              <ProjectCardsSkeleton />
+            </div>
           )}
-        </div>
-      )}
 
-      {!loadingProjects && projects.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {projects.map((p) => (
-            <ProjectCard key={p.id} project={p} workspaceSlug={workspaceSlug} />
-          ))}
-        </div>
+          {!loadingProjects && projects.length === 0 && (
+            <div className="border border-border bg-card px-5 py-12 text-center sm:px-12">
+              <h2 className="text-lg font-semibold text-foreground">
+                Aún no hay proyectos
+              </h2>
+              <p className="text-sm text-muted-foreground mt-1 mb-6">
+                Los proyectos agrupan las tareas de un área de trabajo.
+              </p>
+              {canManage && (
+                <Button onClick={() => setCreateOpen(true)}>
+                  <Plus className="size-4" />
+                  Crear mi primer proyecto
+                </Button>
+              )}
+            </div>
+          )}
+
+          {!loadingProjects && projects.length > 0 && (
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              {projects.map((p) => (
+                <ProjectCard
+                  key={p.id}
+                  project={p}
+                  workspaceSlug={workspaceSlug}
+                />
+              ))}
+            </div>
+          )}
+        </>
       )}
 
       {canManage && (
@@ -156,7 +167,7 @@ function WorkspaceDetailPage() {
           workspaceSlug={workspaceSlug}
         />
       )}
-      {deleteOpen && (
+      {deleteOpen && view !== "activity" && (
         <ConfirmDialog
           title="Eliminar espacio de trabajo"
           description="Esta acción es permanente y eliminará todos los proyectos, tareas, miembros e invitaciones del espacio."
@@ -166,7 +177,7 @@ function WorkspaceDetailPage() {
           onConfirm={() => deleteWorkspace.mutate()}
         />
       )}
-      {workspace?.role === "owner" && (
+      {workspace?.role === "owner" && view !== "activity" && (
         <section className="mt-10 flex flex-col gap-4 border border-destructive/30 bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
           <div>
             <h2 className="text-sm font-semibold text-foreground">

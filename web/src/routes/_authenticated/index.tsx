@@ -40,48 +40,53 @@ function DashboardPage() {
         </Button>
       </header>
 
-      {isLoading && (
-        <div
-          role="status"
-          aria-label="Cargando espacios de trabajo"
-          className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
-        >
-          {Array.from({ length: 3 }, (_, index) => (
-            <div
-              key={index}
-              className="border border-border bg-card p-5"
-              aria-hidden="true"
-            >
-              <Skeleton className="mb-5 size-10" />
-              <Skeleton className="mb-2 h-4 w-2/3" />
-              <Skeleton className="h-3 w-1/3" />
-            </div>
-          ))}
-        </div>
-      )}
+      <section>
+        <h2 className="mb-3 text-sm font-semibold text-foreground">
+          Tus espacios
+        </h2>
+        {isLoading && (
+          <div
+            role="status"
+            aria-label="Cargando espacios de trabajo"
+            className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3"
+          >
+            {Array.from({ length: 3 }, (_, index) => (
+              <div
+                key={index}
+                className="border border-border bg-card p-5"
+                aria-hidden="true"
+              >
+                <Skeleton className="mb-5 size-10" />
+                <Skeleton className="mb-2 h-4 w-2/3" />
+                <Skeleton className="h-3 w-1/3" />
+              </div>
+            ))}
+          </div>
+        )}
 
-      {!isLoading && workspaces.length === 0 && (
-        <div className="border border-border bg-card px-5 py-12 text-center sm:px-12">
-          <h2 className="text-lg font-semibold text-foreground">
-            Aún no tienes espacios de trabajo
-          </h2>
-          <p className="text-sm text-muted-foreground mt-1 mb-6">
-            Crea tu primer espacio para empezar a organizar proyectos y
-            tareas.
-          </p>
-          <Button onClick={() => setCreateOpen(true)}>
-            Crear mi primer espacio
-          </Button>
-        </div>
-      )}
+        {!isLoading && workspaces.length === 0 && (
+          <div className="border border-border bg-card px-5 py-12 text-center sm:px-12">
+            <h3 className="text-lg font-semibold text-foreground">
+              Aún no tienes espacios de trabajo
+            </h3>
+            <p className="text-sm text-muted-foreground mt-1 mb-6">
+              Crea tu primer espacio para empezar a organizar proyectos y
+              tareas.
+            </p>
+            <Button onClick={() => setCreateOpen(true)}>
+              Crear mi primer espacio
+            </Button>
+          </div>
+        )}
 
-      {!isLoading && workspaces.length > 0 && (
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {workspaces.map((ws) => (
-            <WorkspaceCard key={ws.id} workspace={ws} />
-          ))}
-        </div>
-      )}
+        {!isLoading && workspaces.length > 0 && (
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {workspaces.map((ws) => (
+              <WorkspaceCard key={ws.id} workspace={ws} />
+            ))}
+          </div>
+        )}
+      </section>
 
       <CreateWorkspaceDialog
         open={createOpen}

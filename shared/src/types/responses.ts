@@ -1,6 +1,29 @@
 import type { WorkspaceRole } from "../schemas/workspace.schema.ts";
 import type { TaskStatus, TaskPriority } from "../schemas/task.schema.ts";
 
+// ── Activity ──
+export type ActivityType =
+  | "workspace_created"
+  | "project_created"
+  | "task_created"
+  | "task_status_changed"
+  | "member_joined";
+
+export type ActivityItemDto = {
+  id: string;
+  type: ActivityType;
+  actorName: string;
+  workspaceSlug: string;
+  workspaceName: string;
+  projectKey: string | null;
+  projectName: string | null;
+  taskIdentifier: string | null;
+  taskTitle: string | null;
+  previousStatus: TaskStatus | null;
+  newStatus: TaskStatus | null;
+  createdAt: string;
+};
+
 // ── Auth ──
 export type UserResponseDto = {
   id: string;

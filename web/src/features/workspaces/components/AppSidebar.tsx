@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useMatchRoute, useRouterState } from "@tanstack/react-router";
-import { ListTodo, Plus, Users, UserPlus } from "lucide-react";
+import { Activity, ListTodo, Plus, Users, UserPlus } from "lucide-react";
 import { useWorkspaces } from "../hooks/use-workspaces";
 import { useProjects } from "../../projects/hooks/use-projects";
 import { CreateProjectDialog } from "../../projects/components/CreateProjectDialog";
@@ -20,6 +20,9 @@ export function AppSidebar({
   const match = useMatchRoute();
   const isMyTasksView = useRouterState({
     select: (state) => state.location.search.view === "my-tasks",
+  });
+  const isActivityView = useRouterState({
+    select: (state) => state.location.search.view === "activity",
   });
   const params = match({ to: "/workspaces/$workspaceSlug", fuzzy: true });
   const currentSlug = params ? params.workspaceSlug : undefined;
@@ -133,6 +136,28 @@ export function AppSidebar({
                     >
                       <ListTodo className="size-3.5" />
                       <span>Mis tareas</span>
+                    </Link>
+                  </li>
+                </ul>
+              </div>
+
+              <div className="mt-6">
+                <p className="section-label mb-2">Espacio</p>
+                <ul className="space-y-0.5">
+                  <li>
+                    <Link
+                      to="/workspaces/$workspaceSlug"
+                      params={{ workspaceSlug: current.slug }}
+                      search={{ view: "activity" }}
+                      onClick={onNavigate}
+                      className={`flex items-center gap-2 px-2 py-1.5 text-sm transition-colors ${
+                        isActivityView
+                          ? "border-l-2 border-l-primary pl-1.5 text-foreground"
+                          : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                      }`}
+                    >
+                      <Activity className="size-3.5" />
+                      <span>Actividad</span>
                     </Link>
                   </li>
                 </ul>

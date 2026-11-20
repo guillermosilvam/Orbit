@@ -8,6 +8,7 @@ import { WorkspaceMember } from "../entities/workspace-member.entity.ts";
 import { Project } from "../entities/project.entity.ts";
 import { Task } from "../entities/task.entity.ts";
 import { Invitation } from "../entities/invitation.entity.ts";
+import { Activity } from "../entities/activity.entity.ts";
 
 
 export const AppDataSource = new DataSource({
@@ -15,7 +16,7 @@ export const AppDataSource = new DataSource({
   url: env.DATABASE_URL,
   entities: [
     User, Session, Workspace, WorkspaceMember, Project, Task,
-    Invitation
+    Invitation, Activity
   ],
   migrations: ["src/migrations/**/*.ts"],
   synchronize: false,

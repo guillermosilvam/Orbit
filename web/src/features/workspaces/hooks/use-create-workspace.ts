@@ -12,6 +12,7 @@ export function useCreateWorkspace() {
         mutationFn: workspacesApi.create,
         onSuccess: ({ workspace }) => {
             queryClient.invalidateQueries({ queryKey: queryKeys.workspaces.all });
+            queryClient.invalidateQueries({ queryKey: queryKeys.activity.all });
             navigate({
                 to: "/workspaces/$workspaceSlug",
                 params: { workspaceSlug: workspace.slug },

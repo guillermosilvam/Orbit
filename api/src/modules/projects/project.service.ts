@@ -2,6 +2,7 @@ import type { DataSource, Repository } from "typeorm";
 import { Project } from "../../entities/project.entity";
 import { toProjectResponseDto, type CreateProjectInputDto, type ProjectResponseDto, type UpdateProjectInputDto } from "./dto/project.dto";
 import { AppError } from "../../errors/app-error";
+import { recordActivity } from "../activity/activity.service.ts";
 
 export class ProjectService {
     private readonly projectRepo: Repository<Project>
@@ -10,23 +11,37 @@ export class ProjectService {
         this.projectRepo = dataSource.getRepository(Project)
     }
 
-    async create(workspaceId: string, input: CreateProjectInputDto): Promise<ProjectResponseDto> {
-        const existing = await this.projectRepo.findOne({
-            where: { workspaceId, key: input.key },
-        })
+    async create(
+        workspaceId: string,
+        actorId: string,
+        input: CreateProjectInputDto,
+    ): Promise<ProjectResponseDto> {
+        return this.dataSource.transaction(async (manager) => {
+            const existing = await manager.findOne(Project, {
+                where: { workspaceId, key: input.key },
+            });
+            if (existing) {
+                throw AppError.conflict(
+                    `There is already a project with the key “${input.key}” in this workspace`,
+                );
+            }
 
-        if (existing) {
-            throw AppError.conflict(`There is already a project with the key “${input.key}” in this workspace`)
-        }
-
-        const project = this.projectRepo.create({
-            workspaceId,
-            name: input.name,
-            key: input.key,
-            description: input.description ?? null
-        })
-        await this.projectRepo.save(project);
-        return toProjectResponseDto(project)
+            const project = manager.create(Project, {
+                workspaceId,
+                name: input.name,
+                key: input.key,
+                description: input.description ?? null,
+            });
+            await manager.save(project);
+            await recordActivity(manager, {
+                workspaceId,
+                actorId,
+                type: "project_created",
+                projectKey: project.key,
+                projectName: project.name,
+            });
+            return toProjectResponseDto(project);
+        });
     }
 
     async listByWorkspace(workspaceId: string): Promise<ProjectResponseDto[]> {

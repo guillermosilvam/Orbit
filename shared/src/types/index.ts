@@ -1,4 +1,6 @@
 export type {
+  ActivityItemDto,
+  ActivityType,
   AuthResponseDto,
   CreatedInvitationDto,
   InvitationListItemDto,
