@@ -64,7 +64,7 @@ export function MembersList({
                   })
                 }
                 disabled={updateRole.isPending}
-                className="font-mono text-[11px] uppercase tracking-wider border border-border bg-background px-2 py-1 text-foreground focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring disabled:opacity-50"
+                className="text-xs border border-border bg-background px-2 py-1 text-foreground focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring disabled:opacity-50"
                 aria-label={`Rol de ${member.user.name}`}
               >
                 <option value="member">member</option>

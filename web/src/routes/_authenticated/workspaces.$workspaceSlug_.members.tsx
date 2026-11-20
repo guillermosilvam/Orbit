@@ -4,7 +4,7 @@ import { useMembers } from "../../features/workspaces/hooks/use-members";
 import { useLeaveWorkspace } from "../../features/workspaces/hooks/use-leave-workspace";
 import { MembersList } from "../../features/workspaces/components/MembersList";
 import { Button } from "../../shared/ui/Button";
-import { BackButton } from "../../shared/ui/BackButton";
+import { Breadcrumb } from "../../shared/ui/BreadCrumb";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/members",
@@ -29,9 +29,7 @@ function MembersPage() {
   if (loadingWorkspaces) {
     return (
       <div className="p-8">
-        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          Cargando…
-        </p>
+        <p className="text-sm text-muted-foreground">Cargando…</p>
       </div>
     );
   }
@@ -39,6 +37,10 @@ function MembersPage() {
   if (!workspace) {
     return (
       <div className="p-8 max-w-3xl mx-auto">
+        <Breadcrumb
+          className="mb-4"
+          items={[{ label: "Inicio", to: "/" }, { label: "Miembros" }]}
+        />
         <h1 className="text-2xl font-semibold text-foreground">
           Workspace no encontrado
         </h1>
@@ -50,17 +52,20 @@ function MembersPage() {
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
-      <BackButton
-        to="/workspaces/$workspaceSlug"
-        params={{ workspaceSlug }}
-        label="Volver al workspace"
+      <Breadcrumb
         className="mb-4"
+        items={[
+          {
+            label: workspace.name,
+            to: "/workspaces/$workspaceSlug",
+            params: { workspaceSlug },
+          },
+          { label: "Miembros" },
+        ]}
       />
+
       <header className="flex items-end justify-between mb-6 gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-            {workspace.name}
-          </p>
           <h1 className="text-2xl font-semibold text-foreground">Miembros</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Personas con acceso a este workspace.
@@ -83,9 +88,7 @@ function MembersPage() {
       </header>
 
       {loadingMembers ? (
-        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          Cargando miembros…
-        </p>
+        <p className="text-sm text-muted-foreground">Cargando miembros…</p>
       ) : (
         <MembersList
           members={members}
@@ -97,7 +100,7 @@ function MembersPage() {
 
       {isOwner && (
         <p className="text-xs text-muted-foreground mt-4">
-          Como dueño no puedes salir del workspace sin transferir la propiedad.
+          Como owner no puedes salir del workspace sin transferir la propiedad.
         </p>
       )}
     </div>

@@ -61,21 +61,15 @@ export function AppSidebar({
         <div className="flex-1 overflow-auto p-4">
           {current ? (
             <>
-              <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
-                Workspace
-              </p>
+              {/* Nombre del workspace sin la etiqueta "WORKSPACE" (esa
+                  se reserva al bloque de secciones). */}
               <p className="text-sm font-medium text-foreground truncate">
                 {current.name}
-              </p>
-              <p className="font-mono text-[11px] text-muted-foreground mt-0.5">
-                /{current.slug}
               </p>
 
               <div className="mt-6">
                 <div className="flex items-center justify-between mb-2">
-                  <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
-                    Proyectos
-                  </p>
+                  <p className="section-label">Proyectos</p>
                   {canManage && (
                     <IconButton
                       size="sm"
@@ -112,9 +106,7 @@ export function AppSidebar({
               </div>
 
               <div className="mt-6">
-                <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-2">
-                  Workspace
-                </p>
+                <p className="section-label mb-2">Workspace</p>
                 <ul className="space-y-0.5">
                   <li>
                     <SidebarLink
@@ -160,7 +152,6 @@ export function AppSidebar({
   );
 }
 
-
 function SidebarLink({
   to,
   params,
@@ -179,7 +170,7 @@ function SidebarLink({
       params={params}
       className={`flex items-center gap-2 px-2 py-1.5 text-sm transition-colors ${
         isActive
-          ? "text-foreground border-l-[2.5px] border-l-primary"
+          ? "text-foreground border-l-2 border-l-primary pl-1.5"
           : "text-muted-foreground hover:bg-accent hover:text-foreground"
       }`}
     >

@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import { Plus, UserPlus, Users } from "lucide-react";
 import { useWorkspaces } from "../../features/workspaces/hooks/use-workspaces";
 import { useProjects } from "../../features/projects/hooks/use-projects";
 import { ProjectCard } from "../../features/projects/components/ProjectCard";
 import { CreateProjectDialog } from "../../features/projects/components/CreateProjectDialog";
 import { Button } from "../../shared/ui/Button";
-import { Link } from "@tanstack/react-router";
-import { Plus, UserPlus, Users } from "lucide-react";
 import { IconButton } from "../../shared/ui/IconButton";
 
 export const Route = createFileRoute(
@@ -28,9 +27,7 @@ function WorkspaceDetailPage() {
   if (loadingWorkspaces) {
     return (
       <div className="p-8">
-        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          Cargando…
-        </p>
+        <p className="text-sm text-muted-foreground">Cargando…</p>
       </div>
     );
   }
@@ -48,28 +45,25 @@ function WorkspaceDetailPage() {
     );
   }
 
-  const canCreate = workspace.role === "owner" || workspace.role === "admin";
   const canManage = workspace.role === "owner" || workspace.role === "admin";
 
   return (
-    <div className="p-8 max-w-5xl mx-auto">
+    <div className="p-8 max-w-300 mx-auto">
       <header className="flex items-end justify-between mb-6 gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-            Workspace · {workspace.role}
+          <p className="text-xs text-muted-foreground mb-1">
+            Workspace · <span className="font-mono">{workspace.role}</span>
           </p>
           <h1 className="text-2xl font-semibold text-foreground">
             {workspace.name}
           </h1>
-          <p className="font-mono text-[11px] text-muted-foreground mt-1">
-            /{workspace.slug}
-          </p>
         </div>
 
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-2">
           <Link
             to="/workspaces/$workspaceSlug/members"
             params={{ workspaceSlug }}
+            aria-label="Ver miembros"
           >
             <IconButton aria-label="Ver miembros">
               <Users className="size-4" />
@@ -79,6 +73,7 @@ function WorkspaceDetailPage() {
             <Link
               to="/workspaces/$workspaceSlug/invitations"
               params={{ workspaceSlug }}
+              aria-label="Invitaciones"
             >
               <IconButton aria-label="Invitaciones">
                 <UserPlus className="size-4" />
@@ -86,7 +81,7 @@ function WorkspaceDetailPage() {
             </Link>
           )}
           {canManage && (
-            <Button onClick={() => setCreateOpen(true)} className="ml-2">
+            <Button onClick={() => setCreateOpen(true)}>
               <Plus className="size-4" />
               Nuevo proyecto
             </Button>
@@ -95,9 +90,7 @@ function WorkspaceDetailPage() {
       </header>
 
       {loadingProjects && (
-        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          Cargando proyectos…
-        </p>
+        <p className="text-sm text-muted-foreground">Cargando proyectos…</p>
       )}
 
       {!loadingProjects && projects.length === 0 && (
@@ -108,8 +101,9 @@ function WorkspaceDetailPage() {
           <p className="text-sm text-muted-foreground mt-1 mb-6">
             Los proyectos agrupan las tareas de un área de trabajo.
           </p>
-          {canCreate && (
+          {canManage && (
             <Button onClick={() => setCreateOpen(true)}>
+              <Plus className="size-4" />
               Crear mi primer proyecto
             </Button>
           )}
@@ -124,7 +118,7 @@ function WorkspaceDetailPage() {
         </div>
       )}
 
-      {canCreate && (
+      {canManage && (
         <CreateProjectDialog
           open={createOpen}
           onClose={() => setCreateOpen(false)}

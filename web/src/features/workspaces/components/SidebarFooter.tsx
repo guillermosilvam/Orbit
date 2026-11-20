@@ -4,15 +4,6 @@ import type { UserResponseDto } from "@orbit/shared/types/responses";
 import { useLogout } from "../../auth/hooks/use-logout";
 import { ThemePicker } from "./ThemePicker";
 
-/**
- * Footer del sidebar. Tres bloques:
- * 1. Usuario autenticado (avatar + nombre + email).
- * 2. Theme picker (claro / oscuro / sistema).
- * 3. Logout con hover destructivo.
- *
- * El logout usa `mutateAsync` + navigate para evitar la race condition
- * entre la invalidación de `auth.me` y la navegación.
- */
 export function SidebarFooter({ user }: { user: UserResponseDto }) {
   const logout = useLogout();
   const navigate = useNavigate();

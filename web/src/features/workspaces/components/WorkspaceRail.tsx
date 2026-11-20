@@ -2,13 +2,13 @@ import { useState } from "react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import { Plus } from "lucide-react";
 import { useWorkspaces } from "../hooks/use-workspaces";
-import { CreateWorkspaceDialog } from "./CreateWorkspaceDialog"
+import { CreateWorkspaceDialog } from "./CreateWorkspaceDialog";
 import type { WorkspaceWithRoleDto } from "@orbit/shared/types/responses";
 
 export function WorkspaceRail() {
   const { data: workspaces = [] } = useWorkspaces();
   const match = useMatchRoute();
-  const active = match({ to: "/workspaces/$workspaceSlug" });
+  const active = match({ to: "/workspaces/$workspaceSlug", fuzzy: true });
   const activeSlug = active ? active.workspaceSlug : undefined;
 
   const [createOpen, setCreateOpen] = useState(false);
@@ -61,6 +61,7 @@ function RailIcon({
       }`}
       aria-label={workspace.name}
       aria-current={active ? "page" : undefined}
+      title={workspace.name}
     >
       {active && (
         <span className="absolute -left-2.25 top-2 bottom-2 w-0.5 bg-primary" />

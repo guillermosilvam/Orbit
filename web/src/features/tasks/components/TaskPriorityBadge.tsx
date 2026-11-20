@@ -18,7 +18,7 @@ const PRIORITY_CLASS: Record<TaskPriority, string> = {
 export function TaskPriorityBadge({ priority }: { priority: TaskPriority }) {
   return (
     <span
-      className={`font-mono text-[10px] uppercase tracking-wider border px-1.5 py-0.5 ${PRIORITY_CLASS[priority]}`}
+      className={`text-[11px] font-medium border px-1.5 py-0.5 ${PRIORITY_CLASS[priority]}`}
     >
       {PRIORITY_LABEL[priority]}
     </span>

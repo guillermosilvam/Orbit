@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, Plus } from "lucide-react";
+import { createFileRoute } from "@tanstack/react-router";
+import { Plus } from "lucide-react";
 import { useWorkspaces } from "../../features/workspaces/hooks/use-workspaces";
 import { useInvitations } from "../../features/invitations/hooks/use-invitations";
 import { InvitationsList } from "../../features/invitations/components/InvitationsList";
 import { CreateInvitationDialog } from "../../features/invitations/components/CreateInvitationDialog";
 import { Button } from "../../shared/ui/Button";
-import { BackButton } from "../../shared/ui/BackButton";
+import { Breadcrumb } from "../../shared/ui/BreadCrumb";
 
 export const Route = createFileRoute(
   "/_authenticated/workspaces/$workspaceSlug_/invitations",
@@ -27,9 +27,7 @@ function InvitationsPage() {
   if (loadingWorkspaces) {
     return (
       <div className="p-8">
-        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          Cargando…
-        </p>
+        <p className="text-sm text-muted-foreground">Cargando…</p>
       </div>
     );
   }
@@ -37,6 +35,10 @@ function InvitationsPage() {
   if (!workspace) {
     return (
       <div className="p-8 max-w-3xl mx-auto">
+        <Breadcrumb
+          className="mb-4"
+          items={[{ label: "Inicio", to: "/" }, { label: "Invitaciones" }]}
+        />
         <h1 className="text-2xl font-semibold text-foreground">
           Workspace no encontrado
         </h1>
@@ -49,11 +51,16 @@ function InvitationsPage() {
   if (!canManage) {
     return (
       <div className="p-8 max-w-3xl mx-auto">
-        <BackButton
-          to="/workspaces/$workspaceSlug"
-          params={{ workspaceSlug }}
-          label="Volver al workspace"
+        <Breadcrumb
           className="mb-4"
+          items={[
+            {
+              label: workspace.name,
+              to: "/workspaces/$workspaceSlug",
+              params: { workspaceSlug },
+            },
+            { label: "Invitaciones" },
+          ]}
         />
         <h1 className="text-2xl font-semibold text-foreground">Sin acceso</h1>
         <p className="text-sm text-muted-foreground mt-2">
@@ -65,20 +72,20 @@ function InvitationsPage() {
 
   return (
     <div className="p-8 max-w-3xl mx-auto">
-      <Link
-        to="/workspaces/$workspaceSlug"
-        params={{ workspaceSlug }}
-        className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors mb-4 group"
-      >
-        <ArrowLeft className="size-3.5 group-hover:-translate-x-0.5 transition-transform" />
-        Volver al workspace
-      </Link>
+      <Breadcrumb
+        className="mb-4"
+        items={[
+          {
+            label: workspace.name,
+            to: "/workspaces/$workspaceSlug",
+            params: { workspaceSlug },
+          },
+          { label: "Invitaciones" },
+        ]}
+      />
 
       <header className="flex items-end justify-between mb-6 gap-4">
         <div>
-          <p className="font-mono text-[10px] uppercase tracking-wider text-muted-foreground mb-1">
-            {workspace.name}
-          </p>
           <h1 className="text-2xl font-semibold text-foreground">
             Invitaciones
           </h1>
@@ -93,9 +100,7 @@ function InvitationsPage() {
       </header>
 
       {loadingInvitations ? (
-        <p className="font-mono text-xs uppercase tracking-wider text-muted-foreground">
-          Cargando invitaciones…
-        </p>
+        <p className="text-sm text-muted-foreground">Cargando invitaciones…</p>
       ) : (
         <InvitationsList
           invitations={invitations}
