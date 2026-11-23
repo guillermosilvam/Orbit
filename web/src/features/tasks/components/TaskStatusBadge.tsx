@@ -54,7 +54,7 @@ function StatusIcon({ status }: { status: TaskStatus }) {
         aria-hidden
       >
         <circle cx="7" cy="7" r="5.5" stroke="currentColor" strokeWidth="1.5" />
-        {/* Mitad derecha rellena */}
+        {}
         <path d="M7 1.5 A5.5 5.5 0 0 1 7 12.5 Z" fill="currentColor" />
       </svg>
     );

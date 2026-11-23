@@ -3,10 +3,7 @@ import { workspacesApi } from "../api/workspaces.api";
 import { queryKeys } from "../../../shared/lib/query-keys";
 import type { UpdateMemberRoleInputDto } from "@orbit/shared/schemas/workspace.schema";
 
-/**
- * Cambia el rol de un miembro (solo owner/admin).
- * Roles permitidos: "admin" | "member" (owner no se cambia).
- */
+
 export function useUpdateMemberRole(workspaceSlug: string) {
     const queryClient = useQueryClient();
 

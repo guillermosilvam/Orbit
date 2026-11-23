@@ -16,19 +16,7 @@ type RequestOptions = Omit<RequestInit, "body"> & {
   body?: unknown;
 };
 
-/**
- * Cliente HTTP centralizado. Todos los features lo usan.
- *
- * - `credentials: "include"` → envía la cookie `session` en cada petición.
- *   Sin esto, el backend responde 401 en todo lo protegido.
- * - Prefija `/api` → Vite lo proxea a `http://localhost:3000` en dev.
- * - Parsea el error del backend y lo lanza como `ApiError`.
- * - En 204 (sin body), devuelve `null` para no romper `res.json()`.
- *
- * @example
- *   await apiClient<UserResponse>("/auth/me");
- *   await apiClient("/auth/login", { method: "POST", body: { email, password } });
- */
+
 export async function apiClient<T = unknown>(
   path: string,
   options: RequestOptions = {},

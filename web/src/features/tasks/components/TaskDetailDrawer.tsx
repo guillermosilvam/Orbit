@@ -120,14 +120,14 @@ export function TaskDetailDrawer({
 
   return (
     <>
-      {/* Backdrop */}
+      {}
       <div
         className="fixed inset-0 z-40 bg-black/30"
         onClick={onClose}
         aria-hidden
       />
 
-      {/* Drawer */}
+      {}
       <aside
         className="fixed right-0 top-0 bottom-0 w-full max-w-140 z-50 bg-card border-l border-border flex flex-col animate-[slideInRight_200ms_cubic-bezier(0.16,1,0.3,1)] motion-reduce:animate-none"
         role="dialog"
@@ -152,7 +152,7 @@ export function TaskDetailDrawer({
           noValidate
         >
           <div className="p-5 flex flex-col gap-5 flex-1">
-            {/* Título */}
+            {}
             <div>
               <label htmlFor="task-detail-title" className="sr-only">
                 Título
@@ -170,7 +170,7 @@ export function TaskDetailDrawer({
               )}
             </div>
 
-            {/* Descripción */}
+            {}
             <Field
               label="Descripción"
               error={form.formState.errors.description?.message}
@@ -181,7 +181,7 @@ export function TaskDetailDrawer({
               />
             </Field>
 
-            {/* Grid de propiedades tipo hairline */}
+            {}
             <div className="grid grid-cols-1 gap-px border border-border bg-border sm:grid-cols-2">
               <div className="bg-card p-3">
                 <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
@@ -321,7 +321,7 @@ export function TaskDetailDrawer({
             )}
           </div>
 
-          {/* Footer */}
+          {}
           <div className="px-5 py-4 border-t border-border flex items-center justify-between shrink-0">
             <Button
               type="button"

@@ -6,11 +6,7 @@ import type {
     InvitationPreviewDto,
 } from "@orbit/shared/types/responses";
 
-/**
- * Capa API de invitaciones. Dos grupos:
- * - Endpoints bajo workspace (crear, listar, revocar).
- * - Endpoints públicos con token (preview, accept).
- */
+
 export const invitationsApi = {
     create: (workspaceSlug: string, input: CreateInvitationInputDto) =>
         apiClient<{ invitation: CreatedInvitationDto }>(

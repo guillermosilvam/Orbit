@@ -1,13 +1,7 @@
 import { Monitor, Moon, Sun } from "lucide-react";
 import { useTheme, type Theme } from "../../../shared/theme/theme-context";
 
-/**
- * Selector de tema en formato segmentado. Tres botones pegados
- * con `gap-px bg-border`, igual que el resto del sistema hairline.
- *
- * El activo tiene fondo `accent` y texto `foreground`. El ícono cambia
- * por modo. Accesible con `aria-pressed`.
- */
+
 export function ThemePicker() {
   const { theme, setTheme } = useTheme();
 

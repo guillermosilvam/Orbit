@@ -1,10 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import type { ProjectResponseDto } from "@orbit/shared/types/responses";
 
-/**
- * Tarjeta de proyecto en el content area. Toda la tarjeta es un link
- * al detalle del proyecto (step 10).
- */
+
 export function ProjectCard({
   project,
   workspaceSlug,

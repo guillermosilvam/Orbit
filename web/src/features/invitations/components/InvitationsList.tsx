@@ -11,16 +11,7 @@ type Props = {
   workspaceSlug: string;
 };
 
-/**
- * Lista de invitaciones pendientes. Cada fila muestra:
- * - Rol de la persona invitada.
- * - Email si fue para alguien específico, o "Enlace abierto" si no.
- * - Expiración (fecha local).
- * - Botón revocar.
- *
- * Nota: NO se muestra el link porque no se puede recuperar (el backend
- * guarda solo el hash). Para compartir de nuevo, revoca y crea otra.
- */
+
 export function InvitationsList({ invitations, workspaceSlug }: Props) {
   const [invitationToRevoke, setInvitationToRevoke] =
     useState<InvitationListItemDto | null>(null);

@@ -11,9 +11,9 @@ export type Theme = "light" | "dark" | "system";
 const STORAGE_KEY = "orbit-theme";
 
 type ThemeContextValue = {
-  /** Preferencia guardada del user. */
+  
   theme: Theme;
-  /** Tema efectivo después de resolver "system" contra el OS. */
+  
   resolvedTheme: "light" | "dark";
   setTheme: (theme: Theme) => void;
 };
@@ -41,17 +41,7 @@ function applyTheme(theme: Theme): "light" | "dark" {
   return isDark ? "dark" : "light";
 }
 
-/**
- * Provider de tema. Resuelve "system" contra `prefers-color-scheme`,
- * aplica la clase `.dark` en `<html>` y guarda la preferencia en localStorage.
- *
- * Cuando `theme === "system"`, escucha cambios del OS en vivo: si el user
- * cambia su preferencia del sistema mientras la app está abierta, el tema
- * se actualiza sin recargar.
- *
- * El script anti-flash de `index.html` lee la misma clave de localStorage
- * para evitar el flash de tema claro en el primer paint.
- */
+
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(getStoredTheme);
   const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(() =>

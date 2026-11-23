@@ -16,14 +16,7 @@ type Props = {
   workspaceSlug: string;
 };
 
-/**
- * Diálogo de creación de proyecto. Tres campos:
- * - name: nombre visible (libre).
- * - key: 2-5 chars UPPERCASE, único por workspace. Se usa para IDs de tarea (`WEB-12`).
- * - description: opcional.
- *
- * Si el backend devuelve 409 (key duplicada), se muestra como banner.
- */
+
 export function CreateProjectDialog({ open, onClose, workspaceSlug }: Props) {
   const form = useForm<CreateProjectInputDto>({
     resolver: zodResolver(createProjectSchema),

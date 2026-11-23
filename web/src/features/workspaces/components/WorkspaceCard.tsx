@@ -2,9 +2,7 @@ import { Link } from "@tanstack/react-router";
 import type { WorkspaceWithRoleDto } from "@orbit/shared/types/responses";
 import { formatWorkspaceRole } from "../lib/format-role";
 
-/**
- * La tarjeta completa abre el espacio de trabajo para evitar un botón adicional.
- */
+
 export function WorkspaceCard({
   workspace,
 }: {

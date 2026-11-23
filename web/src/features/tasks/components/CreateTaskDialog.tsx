@@ -25,11 +25,7 @@ type Props = {
   projectKey: string;
 };
 
-/**
- * Diálogo de crear tarea con estado, prioridad, asignación y fecha límite.
- *
- * El `number` (WEB-12) lo asigna el backend atómicamente; no va en el form.
- */
+
 export function CreateTaskDialog({
   open,
   onClose,

@@ -3,7 +3,7 @@ import { cn } from "../lib/cn";
 
 type BreadcrumbItem = {
   label: string;
-  /** Si se omite, el item es texto plano (último item). */
+  
   to?: string;
   params?: Record<string, string>;
 };

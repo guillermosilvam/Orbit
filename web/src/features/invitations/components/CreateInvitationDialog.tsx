@@ -16,14 +16,7 @@ import { useCreateInvitation } from "../hooks/use-create-invitation";
 import { ApiError } from "../../../shared/lib/api-client";
 import { formatWorkspaceRole } from "../../workspaces/lib/format-role";
 
-/**
- * Schema local para el form. Reemplaza `expiresInHours` de `z.coerce.number()`
- * por `z.number()` puro para evitar el mismatch de tipos con RHF:
- * `coerce` infiere `input: unknown`, y el resolver de RHF espera `number`.
- *
- * El valor llega como número porque `register` usa `setValueAs` para
- * convertir el string del input, o `undefined` si está vacío.
- */
+
 const formSchema = createInvitationSchema.extend({
   expiresInHours: z.number().int().min(1).max(720).optional(),
 });
@@ -57,14 +50,14 @@ export function CreateInvitationDialog({
       form.reset();
       create.reset();
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    
   }, [open]);
 
   if (!open) return null;
 
   const onSubmit = form.handleSubmit((data) => {
-    // Construimos el payload compatible con `CreateInvitationInputDto`.
-    // `expiresInHours` puede ser `undefined` (queda el default del backend).
+    
+    
     const payload: CreateInvitationInputDto = {
       role: data.role,
       expiresInHours: data.expiresInHours,
