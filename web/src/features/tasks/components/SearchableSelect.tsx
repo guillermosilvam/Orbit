@@ -6,6 +6,7 @@ import {
   type ReactNode,
 } from "react";
 import { Check, ChevronDown, Search } from "lucide-react";
+import { createPortal } from "react-dom";
 
 export type SearchableSelectOption = {
   value: string;
@@ -40,6 +41,9 @@ export function SearchableSelect({
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
   const selected = options.find((option) => option.value === value);
   const close = useCallback(() => {
     setOpen(false);
@@ -55,7 +59,10 @@ export function SearchableSelect({
     if (!open) return;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) close();
+      if (
+        !rootRef.current?.contains(event.target as Node) &&
+        !popoverRef.current?.contains(event.target as Node)
+      ) close();
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") close();
@@ -69,9 +76,39 @@ export function SearchableSelect({
     };
   }, [close, open]);
 
+  useEffect(() => {
+    if (!open) return;
+
+    const updatePosition = () => {
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (!rect) return;
+
+      const menuWidth = 256;
+      const menuHeight = popoverRef.current?.offsetHeight ?? 280;
+      const left = Math.min(
+        window.innerWidth - menuWidth - 8,
+        Math.max(8, rect.left),
+      );
+      const top =
+        rect.bottom + menuHeight + 4 <= window.innerHeight
+          ? rect.bottom + 4
+          : Math.max(8, rect.top - menuHeight - 4);
+      setPosition({ top, left });
+    };
+
+    updatePosition();
+    window.addEventListener("resize", updatePosition);
+    window.addEventListener("scroll", updatePosition, true);
+    return () => {
+      window.removeEventListener("resize", updatePosition);
+      window.removeEventListener("scroll", updatePosition, true);
+    };
+  }, [open]);
+
   return (
     <div ref={rootRef} className={`relative min-w-0 ${className}`}>
       <button
+        ref={buttonRef}
         type="button"
         disabled={disabled}
         aria-label={label}
@@ -94,8 +131,13 @@ export function SearchableSelect({
         <ChevronDown className="size-3.5 shrink-0 text-muted-foreground" />
       </button>
 
-      {open && (
-        <div className="absolute left-0 top-full z-60 mt-1 w-64 max-w-[min(90vw,20rem)] border border-border bg-popover text-popover-foreground shadow-lg">
+      {open &&
+        createPortal(
+          <div
+            ref={popoverRef}
+            style={{ position: "fixed", top: position.top, left: position.left }}
+            className="z-120 w-64 max-w-[min(90vw,20rem)] border border-border bg-popover text-popover-foreground shadow-lg"
+          >
           <div className="flex items-center gap-2 border-b border-border px-3">
             <Search className="size-3.5 shrink-0 text-muted-foreground" />
             <input
@@ -140,8 +182,9 @@ export function SearchableSelect({
               </p>
             )}
           </div>
-        </div>
-      )}
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Trash2 } from "lucide-react";
+import { ChevronDown, Trash2 } from "lucide-react";
 import type { WorkspaceMemberResponseDto } from "@orbit/shared/types/responses";
 import type { WorkspaceRole } from "@orbit/shared/schemas/workspace.schema";
 import { useUpdateMemberRole } from "../hooks/use-update-member-role";
@@ -60,21 +60,27 @@ export function MembersList({
             </div>
 
             {canChangeRole ? (
-              <select
-                value={member.role}
-                onChange={(e) =>
-                  updateRole.mutate({
-                    userId: member.userId,
-                    input: { role: e.target.value as "admin" | "member" },
-                  })
-                }
-                disabled={updateRole.isPending}
-                className="text-xs border border-border bg-background px-2 py-1 text-foreground focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-ring disabled:opacity-50"
-                aria-label={`Rol de ${member.user.name}`}
-              >
-                <option value="member">Miembro</option>
-                <option value="admin">Administrador</option>
-              </select>
+              <div className="relative shrink-0">
+                <select
+                  value={member.role}
+                  onChange={(e) =>
+                    updateRole.mutate({
+                      userId: member.userId,
+                      input: { role: e.target.value as "admin" | "member" },
+                    })
+                  }
+                  disabled={updateRole.isPending}
+                  className="h-8 appearance-none border border-border bg-card pl-2.5 pr-8 text-xs font-medium text-foreground transition-colors hover:bg-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring disabled:cursor-not-allowed disabled:opacity-50"
+                  aria-label={`Rol de ${member.user.name}`}
+                >
+                  <option value="member">Miembro</option>
+                  <option value="admin">Administrador</option>
+                </select>
+                <ChevronDown
+                  className="pointer-events-none absolute right-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground"
+                  aria-hidden
+                />
+              </div>
             ) : (
               <span className="border border-border bg-background px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                 {formatWorkspaceRole(member.role)}

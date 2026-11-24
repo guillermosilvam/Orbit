@@ -28,6 +28,7 @@ import { TaskDatePicker } from "./TaskDatePicker";
 import { SearchableSelect } from "./SearchableSelect";
 import { taskDetailQueryOptions } from "../api/tasks-queries";
 import { ConfirmDialog } from "../../../shared/ui/ConfirmDialog";
+import { useToast } from "../../../shared/ui/toast-context";
 
 const drawerFormSchema = updateTaskSchema.omit({ position: true });
 type DrawerFormData = z.infer<typeof drawerFormSchema>;
@@ -46,6 +47,7 @@ export function TaskDetailDrawer({
   projectKey,
 }: Props) {
   const update = useUpdateTaskFields(workspaceSlug, projectKey);
+  const toast = useToast();
   const remove = useDeleteTask(workspaceSlug, projectKey);
   const membersQuery = useMembers(workspaceSlug);
   const members = membersQuery.data ?? [];
@@ -56,6 +58,8 @@ export function TaskDetailDrawer({
   const taskData = taskDetailQuery.data ?? task;
   const lastTaskId = useRef<string | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
+  const [pendingDone, setPendingDone] = useState(false);
+  const [pendingReopen, setPendingReopen] = useState(false);
 
   const form = useForm<DrawerFormData>({
     resolver: zodResolver(drawerFormSchema),
@@ -109,7 +113,21 @@ export function TaskDetailDrawer({
     };
     update.mutate(
       { number: task.number, input: payload },
-      { onSuccess: () => onClose() },
+      {
+        onSuccess: () => {
+          if (data.status === "done" && task.status !== "done") {
+            toast.success("Tarea marcada como hecha.", {
+              label: "Deshacer",
+              onClick: () =>
+                update.mutate({
+                  number: task.number,
+                  input: { status: "in_progress" },
+                }),
+            });
+          }
+          onClose();
+        },
+      },
     );
   });
 
@@ -141,9 +159,20 @@ export function TaskDetailDrawer({
             </span>
             <TaskStatusBadge status={task.status} />
           </div>
-          <IconButton aria-label="Cerrar" onClick={onClose}>
-            <X className="size-4" />
-          </IconButton>
+          <div className="flex items-center gap-1">
+            {task.status === "done" && (
+              <button
+                type="button"
+                onClick={() => setPendingReopen(true)}
+                className="h-8 px-2 text-xs font-medium text-muted-foreground hover:text-foreground"
+              >
+                Reabrir
+              </button>
+            )}
+            <IconButton aria-label="Cerrar" onClick={onClose}>
+              <X className="size-4" />
+            </IconButton>
+          </div>
         </header>
 
         <form
@@ -194,11 +223,21 @@ export function TaskDetailDrawer({
                     <SearchableSelect
                       label="Estado"
                       value={field.value ?? "todo"}
-                      options={TASK_STATUSES.map((status) => ({
-                        value: status,
-                        label: statusLabel(status),
-                      }))}
-                      onChange={field.onChange}
+                      options={
+                        task.status === "done"
+                          ? [{ value: "done", label: "Hecho" }]
+                          : TASK_STATUSES.map((status) => ({
+                              value: status,
+                              label: statusLabel(status),
+                            }))
+                      }
+                      onChange={(status) => {
+                        if (status === "done" && task.status !== "done") {
+                          setPendingDone(true);
+                        } else if (task.status !== "done") {
+                          field.onChange(status);
+                        }
+                      }}
                       className="w-full [&>button]:w-full"
                     />
                   )}
@@ -354,6 +393,33 @@ export function TaskDetailDrawer({
           onConfirm={() =>
             remove.mutate(task.number, { onSuccess: () => onClose() })
           }
+        />
+      )}
+      {pendingDone && (
+        <ConfirmDialog
+          title={`Marcar ${task.identifier} como hecha`}
+          description="Confirma que esta tarea ya está terminada."
+          confirmLabel="Marcar como hecha"
+          onClose={() => setPendingDone(false)}
+          onConfirm={() => {
+            form.setValue("status", "done", { shouldDirty: true });
+            setPendingDone(false);
+          }}
+        />
+      )}
+      {pendingReopen && (
+        <ConfirmDialog
+          title={`Reabrir ${task.identifier}`}
+          description="La tarea volverá al estado En progreso."
+          confirmLabel="Reabrir tarea"
+          onClose={() => setPendingReopen(false)}
+          onConfirm={() => {
+            update.mutate({
+              number: task.number,
+              input: { status: "in_progress" },
+            });
+            setPendingReopen(false);
+          }}
         />
       )}
     </>

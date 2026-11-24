@@ -11,26 +11,37 @@ export function KanbanCard({
   isOverlay = false,
   onClick,
   members = [],
+  onReopen,
 }: {
   task: TaskResponseDto;
   isOverlay?: boolean;
   onClick?: () => void;
   members?: WorkspaceMemberResponseDto[];
+  onReopen?: () => void;
 }) {
   if (isOverlay) {
     return <CardBody task={task} members={members} />;
   }
-  return <SortableCard task={task} onClick={onClick} members={members} />;
+  return (
+    <SortableCard
+      task={task}
+      onClick={onClick}
+      members={members}
+      onReopen={onReopen}
+    />
+  );
 }
 
 function SortableCard({
   task,
   onClick,
   members,
+  onReopen,
 }: {
   task: TaskResponseDto;
   onClick?: () => void;
   members: WorkspaceMemberResponseDto[];
+  onReopen?: () => void;
 }) {
   const {
     attributes,
@@ -54,7 +65,7 @@ function SortableCard({
       onClick={onClick}
       className="group cursor-grab touch-pan-y active:cursor-grabbing"
     >
-      <CardBody task={task} members={members} />
+      <CardBody task={task} members={members} onReopen={onReopen} />
     </div>
   );
 }
@@ -62,9 +73,11 @@ function SortableCard({
 function CardBody({
   task,
   members,
+  onReopen,
 }: {
   task: TaskResponseDto;
   members: WorkspaceMemberResponseDto[];
+  onReopen?: () => void;
 }) {
   const member = members.find((item) => item.userId === task.assigneeId);
 
@@ -83,7 +96,22 @@ function CardBody({
           assigned={Boolean(task.assigneeId)}
           size="sm"
         />
-        <DueDateBadge dueDate={task.dueDate} status={task.status} compact />
+        <div className="flex items-center gap-2">
+          {onReopen && (
+            <button
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={(event) => {
+                event.stopPropagation();
+                onReopen();
+              }}
+              className="text-[11px] font-medium text-muted-foreground hover:text-foreground"
+            >
+              Reabrir
+            </button>
+          )}
+          <DueDateBadge dueDate={task.dueDate} status={task.status} compact />
+        </div>
       </div>
     </div>
   );

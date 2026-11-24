@@ -7,7 +7,8 @@ type Props = {
   onClose: () => void;
 };
 
-const SUPPORT_EMAIL = "guillermosivlam13@gmail.com";
+const BUG_REPORT_URL =
+  "https://github.com/guillermosilvam/Orbit/issues/new?labels=bug&title=%5BBug%5D%20&body=%23%23%20Descripci%C3%B3n%0A%0A%23%23%20Pasos%20para%20reproducir%0A1.%20%0A2.%20%0A3.%20%0A%0A%23%23%20Resultado%20esperado%0A%0A%23%23%20Resultado%20actual";
 const CREATOR_PROFILE = "https://github.com/guillermosilvam";
 
 export function SettingsDialog({ open, onClose }: Props) {
@@ -71,13 +72,16 @@ export function SettingsDialog({ open, onClose }: Props) {
                 ¿Encontraste un problema?
               </h3>
               <p className="mt-1 text-xs text-muted-foreground">
-                El repositorio es privado. Escríbeme y cuéntame qué pasó.
+                Reporta el problema directamente en GitHub.
               </p>
               <a
-                href={`mailto:${SUPPORT_EMAIL}?subject=Reporte%20de%20problema%20en%20Orbit`}
-                className="mt-2 inline-block break-all text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
+                href={BUG_REPORT_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="mt-2 inline-flex items-center gap-1 text-sm font-medium text-primary underline-offset-4 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring"
               >
-                {SUPPORT_EMAIL}
+                Reportar un bug
+                <span aria-hidden>↗</span>
               </a>
             </div>
           </div>

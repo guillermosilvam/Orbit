@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { CalendarDays, ChevronLeft, ChevronRight } from "lucide-react";
 import {
   describeDueDate,
@@ -25,6 +26,9 @@ export function TaskDatePicker({
 }: Props) {
   const [open, setOpen] = useState(false);
   const rootRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
   const selectedKey = toDateKey(value);
   const [month, setMonth] = useState(
     () => {
@@ -46,7 +50,10 @@ export function TaskDatePicker({
     if (!open) return;
 
     const handlePointerDown = (event: PointerEvent) => {
-      if (!rootRef.current?.contains(event.target as Node)) setOpen(false);
+      if (
+        !rootRef.current?.contains(event.target as Node) &&
+        !popoverRef.current?.contains(event.target as Node)
+      ) setOpen(false);
     };
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setOpen(false);
@@ -69,6 +76,22 @@ export function TaskDatePicker({
       const currentDate = selectedKey ? parseDateKey(selectedKey) : new Date();
       setMonth(new Date(currentDate.getFullYear(), currentDate.getMonth(), 1));
       setToday(localDateKey(new Date()));
+      const rect = buttonRef.current?.getBoundingClientRect();
+      if (rect) {
+        const calendarHeight = 330;
+        const calendarWidth = 288;
+        const top =
+          rect.bottom + calendarHeight + 4 <= window.innerHeight
+            ? rect.bottom + 4
+            : Math.max(8, rect.top - calendarHeight - 4);
+        setPosition({
+          top,
+          left: Math.min(
+            window.innerWidth - calendarWidth - 8,
+            Math.max(8, rect.left),
+          ),
+        });
+      }
       setOpen(true);
     } else {
       setOpen(false);
@@ -78,6 +101,7 @@ export function TaskDatePicker({
   return (
     <div ref={rootRef} className="relative min-w-0">
       <button
+        ref={buttonRef}
         type="button"
         aria-label={label}
         aria-haspopup="dialog"
@@ -93,111 +117,115 @@ export function TaskDatePicker({
         </span>
       </button>
 
-      {open && (
-        <div
-          role="dialog"
-          aria-label="Elegir fecha límite"
-          className="absolute left-0 top-full z-60 mt-1 w-72 border border-border bg-popover p-3 text-popover-foreground shadow-lg"
-        >
-          <header className="mb-3 flex items-center justify-between">
-            <button
-              type="button"
-              onClick={() =>
-                setMonth(
-                  (current) =>
-                    new Date(current.getFullYear(), current.getMonth() - 1, 1),
-                )
-              }
-              aria-label="Mes anterior"
-              className="inline-flex size-8 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <ChevronLeft className="size-4" />
-            </button>
-            <p className="text-sm font-medium capitalize text-foreground">
-              {monthLabel}
-            </p>
-            <button
-              type="button"
-              onClick={() =>
-                setMonth(
-                  (current) =>
-                    new Date(current.getFullYear(), current.getMonth() + 1, 1),
-                )
-              }
-              aria-label="Mes siguiente"
-              className="inline-flex size-8 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground"
-            >
-              <ChevronRight className="size-4" />
-            </button>
-          </header>
-
-          <div className="grid grid-cols-7 gap-1">
-            {WEEKDAYS.map((day) => (
-              <span
-                key={day}
-                className="py-1 text-center text-[10px] font-medium text-muted-foreground"
+      {open &&
+        createPortal(
+          <div
+            ref={popoverRef}
+            role="dialog"
+            aria-label="Elegir fecha límite"
+            style={{ position: "fixed", top: position.top, left: position.left }}
+            className="z-120 w-72 border border-border bg-popover p-3 text-popover-foreground shadow-lg"
+          >
+            <header className="mb-3 flex items-center justify-between">
+              <button
+                type="button"
+                onClick={() =>
+                  setMonth(
+                    (current) =>
+                      new Date(current.getFullYear(), current.getMonth() - 1, 1),
+                  )
+                }
+                aria-label="Mes anterior"
+                className="inline-flex size-8 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground"
               >
-                {day}
-              </span>
-            ))}
-            {Array.from({ length: firstDayOffset }, (_, index) => (
-              <span key={`empty-${index}`} aria-hidden />
-            ))}
-            {Array.from({ length: daysInMonth }, (_, index) => {
-              const day = index + 1;
-              const dateKey = localDateKey(
-                new Date(month.getFullYear(), month.getMonth(), day),
-              );
-              const isSelected = dateKey === selectedKey;
-              const isToday = dateKey === today;
-              return (
-                <button
-                  key={dateKey}
-                  type="button"
-                  aria-label={formatAccessibleDate(dateKey)}
-                  aria-pressed={isSelected}
-                  onClick={() => {
-                    onChange(toDueDateIso(dateKey));
-                    setOpen(false);
-                  }}
-                  className={`inline-flex size-8 items-center justify-center text-xs transition-colors hover:bg-accent ${
-                    isSelected
-                      ? "bg-primary text-primary-foreground hover:bg-primary-hover"
-                      : isToday
-                        ? "border border-primary text-foreground"
-                        : "text-foreground"
-                  }`}
+                <ChevronLeft className="size-4" />
+              </button>
+              <p className="text-sm font-medium capitalize text-foreground">
+                {monthLabel}
+              </p>
+              <button
+                type="button"
+                onClick={() =>
+                  setMonth(
+                    (current) =>
+                      new Date(current.getFullYear(), current.getMonth() + 1, 1),
+                  )
+                }
+                aria-label="Mes siguiente"
+                className="inline-flex size-8 items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground"
+              >
+                <ChevronRight className="size-4" />
+              </button>
+            </header>
+
+            <div className="grid grid-cols-7 gap-1">
+              {WEEKDAYS.map((day) => (
+                <span
+                  key={day}
+                  className="py-1 text-center text-[10px] font-medium text-muted-foreground"
                 >
                   {day}
-                </button>
-              );
-            })}
-          </div>
+                </span>
+              ))}
+              {Array.from({ length: firstDayOffset }, (_, index) => (
+                <span key={`empty-${index}`} aria-hidden />
+              ))}
+              {Array.from({ length: daysInMonth }, (_, index) => {
+                const day = index + 1;
+                const dateKey = localDateKey(
+                  new Date(month.getFullYear(), month.getMonth(), day),
+                );
+                const isSelected = dateKey === selectedKey;
+                const isToday = dateKey === today;
+                return (
+                  <button
+                    key={dateKey}
+                    type="button"
+                    aria-label={formatAccessibleDate(dateKey)}
+                    aria-pressed={isSelected}
+                    onClick={() => {
+                      onChange(toDueDateIso(dateKey));
+                      setOpen(false);
+                    }}
+                    className={`inline-flex size-8 items-center justify-center text-xs transition-colors hover:bg-accent ${
+                      isSelected
+                        ? "bg-primary text-primary-foreground hover:bg-primary-hover"
+                        : isToday
+                          ? "border border-primary text-foreground"
+                          : "text-foreground"
+                    }`}
+                  >
+                    {day}
+                  </button>
+                );
+              })}
+            </div>
 
-          <div className="mt-3 flex justify-between border-t border-border pt-2">
-            <button
-              type="button"
-              onClick={() => {
-                onChange(null);
-                setOpen(false);
-              }}
-              className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
-            >
-              Quitar fecha
-            </button>
-            <button
-              type="button"
-              onClick={() => {
-                onChange(toDueDateIso(today));
-                setOpen(false);
-              }}
-              className="px-2 py-1 text-xs font-medium text-primary hover:underline"
-            >
-              Hoy
-            </button>
-          </div>
-        </div>
-      )}
+            <div className="mt-3 flex justify-between border-t border-border pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  onChange(null);
+                  setOpen(false);
+                }}
+                className="px-2 py-1 text-xs text-muted-foreground hover:text-foreground"
+              >
+                Quitar fecha
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  onChange(toDueDateIso(today));
+                  setOpen(false);
+                }}
+                className="px-2 py-1 text-xs font-medium text-primary hover:underline"
+              >
+                Hoy
+              </button>
+            </div>
+          </div>,
+          document.body,
+        )}
     </div>
   );
 }

@@ -12,23 +12,24 @@ import {
   type ToastContextValue,
   type ToastKind,
 } from "./toast-context";
+import type { ToastAction } from "./toast-context";
 
-type ToastItem = { id: number; kind: ToastKind; message: string };
+type ToastItem = { id: number; kind: ToastKind; message: string; action?: ToastAction };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastItem[]>([]);
   const nextId = useRef(0);
 
-  const notify = useCallback((kind: ToastKind, message: string) => {
+  const notify = useCallback((kind: ToastKind, message: string, action?: ToastAction) => {
     const id = ++nextId.current;
-    setToasts((current) => [...current.slice(-2), { id, kind, message }]);
+    setToasts((current) => [...current.slice(-2), { id, kind, message, action }]);
   }, []);
   const dismiss = useCallback((id: number) => {
     setToasts((current) => current.filter((toast) => toast.id !== id));
   }, []);
   const value = useMemo<ToastContextValue>(
     () => ({
-      success: (message) => notify("success", message),
+      success: (message, action) => notify("success", message, action),
       error: (message) => notify("error", message),
     }),
     [notify],
@@ -77,6 +78,18 @@ function ToastCard({
         aria-hidden
       />
       <p className="min-w-0 flex-1">{toast.message}</p>
+      {toast.action && (
+        <button
+          type="button"
+          onClick={() => {
+            toast.action?.onClick();
+            dismiss();
+          }}
+          className="shrink-0 text-xs font-medium text-primary underline-offset-4 hover:underline"
+        >
+          {toast.action.label}
+        </button>
+      )}
       <button
         type="button"
         onClick={dismiss}

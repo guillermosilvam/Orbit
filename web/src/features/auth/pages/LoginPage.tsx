@@ -40,12 +40,6 @@ export function LoginPage() {
                   strokeDasharray="2 2"
                 />
                 <circle cx="12" cy="12" r="3.5" fill="currentColor" />
-                <circle
-                  cx="19"
-                  cy="8"
-                  r="1.5"
-                  fill="var(--status-in-progress)"
-                />
               </svg>
               <span className="text-lg font-semibold tracking-tight text-foreground">
                 Orbit

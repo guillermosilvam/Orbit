@@ -14,11 +14,13 @@ export function KanbanColumn({
   tasks,
   onSelectTask,
   members,
+  onReopen,
 }: {
   status: TaskStatus;
   tasks: TaskResponseDto[];
   onSelectTask: (task: TaskResponseDto) => void;
   members: WorkspaceMemberResponseDto[];
+  onReopen: (task: TaskResponseDto) => void;
 }) {
   const { setNodeRef, isOver } = useDroppable({ id: status });
 
@@ -47,6 +49,7 @@ export function KanbanColumn({
               task={task}
               members={members}
               onClick={() => onSelectTask(task)}
+              onReopen={status === "done" ? () => onReopen(task) : undefined}
             />
           ))}
         </SortableContext>

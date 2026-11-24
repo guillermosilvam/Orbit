@@ -10,6 +10,9 @@ import type { WorkspaceMemberResponseDto } from "@orbit/shared/types/responses";
 import { TaskAssigneeAvatar } from "./TaskAssigneeAvatar";
 import { DueDateBadge } from "./DueDateBadge";
 import type { TaskGroupBy } from "./TaskFilters";
+import { useState } from "react";
+import { useUpdateTask } from "../hooks/use-update-task";
+import { ConfirmDialog } from "../../../shared/ui/ConfirmDialog";
 
 const STATUS_ORDER: TaskStatus[] = ["todo", "in_progress", "done"];
 const PRIORITY_ORDER: TaskPriority[] = [...TASK_PRIORITIES].reverse();
@@ -44,8 +47,23 @@ export function TaskList({
   members = [],
   groupBy = "status",
   onSelectTask,
+  workspaceSlug,
+  projectKey,
 }: Props) {
   const grouped = groupTasks(tasks, members, groupBy);
+  const updateTask = useUpdateTask(workspaceSlug, projectKey);
+  const [pendingReopen, setPendingReopen] = useState<TaskResponseDto | null>(null);
+
+  const confirmReopen = () => {
+    if (!pendingReopen) return;
+    const task = pendingReopen;
+    updateTask.mutate({
+      id: task.id,
+      number: task.number,
+      status: "in_progress",
+      position: task.position,
+    });
+  };
 
   const isEmpty = tasks.length === 0;
 
@@ -63,6 +81,7 @@ export function TaskList({
   }
 
   return (
+    <>
     <div className="flex flex-col gap-6">
       {grouped.map((group) => {
         return (
@@ -98,6 +117,7 @@ export function TaskList({
                     (item) => item.userId === task.assigneeId,
                   )}
                   onClick={() => onSelectTask(task)}
+                  onReopen={() => setPendingReopen(task)}
                 />
               ))}
             </div>
@@ -105,6 +125,16 @@ export function TaskList({
         );
       })}
     </div>
+    {pendingReopen && (
+      <ConfirmDialog
+        title={`Reabrir ${pendingReopen.identifier}`}
+        description="La tarea volverá al estado En progreso."
+        confirmLabel="Reabrir tarea"
+        onClose={() => setPendingReopen(null)}
+        onConfirm={confirmReopen}
+      />
+    )}
+    </>
   );
 }
 
@@ -112,37 +142,46 @@ function TaskRow({
   task,
   member,
   onClick,
+  onReopen,
 }: {
   task: TaskResponseDto;
   member?: WorkspaceMemberResponseDto;
   onClick: () => void;
+  onReopen: () => void;
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="flex w-full items-center gap-2 border-b border-border px-3 py-3 text-left transition-colors last:border-b-0 hover:bg-accent sm:gap-3 sm:px-4"
-    >
-      <span className="w-14 shrink-0 font-mono text-[10px] text-muted-foreground tabular sm:w-16 sm:text-[11px]">
-        {task.identifier}
-      </span>
-      <span className="min-w-0 flex-1 truncate text-sm text-foreground">
-        {task.title}
-      </span>
-      <span className="ml-auto flex shrink-0 items-center gap-2">
+    <div className="flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-accent sm:gap-3 sm:px-4">
+      <button
+        type="button"
+        onClick={onClick}
+        className="flex min-w-0 flex-1 items-center gap-2 py-1 text-left sm:gap-3"
+      >
+        <span className="w-14 shrink-0 font-mono text-[10px] text-muted-foreground tabular sm:w-16 sm:text-[11px]">
+          {task.identifier}
+        </span>
+        <span className="min-w-0 flex-1 truncate text-sm text-foreground">
+          {task.title}
+        </span>
+      </button>
+      {task.status === "done" ? (
+        <button
+          type="button"
+          onClick={onReopen}
+          className="shrink-0 text-[11px] font-medium text-muted-foreground hover:text-foreground"
+        >
+          Reabrir
+        </button>
+      ) : null}
+      <span className="hidden shrink-0 items-center gap-2 sm:flex">
         <TaskAssigneeAvatar
           member={member}
           assigned={Boolean(task.assigneeId)}
           size="sm"
         />
-        <DueDateBadge
-          dueDate={task.dueDate}
-          status={task.status}
-          compact
-        />
+        <DueDateBadge dueDate={task.dueDate} status={task.status} compact />
         <TaskPriorityBadge priority={task.priority} />
       </span>
-    </button>
+    </div>
   );
 }
 

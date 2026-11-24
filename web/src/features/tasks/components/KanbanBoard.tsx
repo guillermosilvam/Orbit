@@ -19,6 +19,8 @@ import type { WorkspaceMemberResponseDto } from "@orbit/shared/types/responses";
 import { KanbanColumn } from "./KanbanColumn";
 import { KanbanCard } from "./KanbanCard";
 import { useUpdateTask } from "../hooks/use-update-task";
+import { ConfirmDialog } from "../../../shared/ui/ConfirmDialog";
+import { useToast } from "../../../shared/ui/toast-context";
 
 const POSITION_GAP = 1000;
 
@@ -36,7 +38,13 @@ export function KanbanBoard({
   members?: WorkspaceMemberResponseDto[];
 }) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  const [pendingDone, setPendingDone] = useState<{
+    task: TaskResponseDto;
+    position: number;
+  } | null>(null);
+  const [pendingReopen, setPendingReopen] = useState<TaskResponseDto | null>(null);
   const updateTask = useUpdateTask(workspaceSlug, projectKey);
+  const toast = useToast();
 
   const sensors = useSensors(
     useSensor(MouseSensor, { activationConstraint: { distance: 8 } }),
@@ -80,6 +88,11 @@ export function KanbanBoard({
       return;
     }
 
+    if (activeTask.status === "done" && targetStatus !== "done") {
+      setActiveId(null);
+      return;
+    }
+
     const newPosition = calculatePosition(
       tasks,
       activeTask.id,
@@ -87,49 +100,113 @@ export function KanbanBoard({
       over.id as string,
     );
 
-    updateTask.mutate({
-      id: activeTask.id,
-      number: activeTask.number,
-      status: targetStatus,
-      position: newPosition,
-    });
+    if (targetStatus === "done") {
+      setPendingDone({ task: activeTask, position: newPosition });
+    } else {
+      updateTask.mutate({
+        id: activeTask.id,
+        number: activeTask.number,
+        status: targetStatus,
+        position: newPosition,
+      });
+    }
 
     setActiveId(null);
   };
 
-  return (
-    <DndContext
-      sensors={sensors}
-      collisionDetection={closestCorners}
-      onDragStart={handleDragStart}
-      onDragEnd={handleDragEnd}
-      onDragCancel={handleDragCancel}
-    >
-      <div
-        className="grid min-w-0 grid-cols-1 gap-px border border-border bg-border sm:grid-cols-3"
-        role="region"
-        aria-label="Tablero de tareas"
-        tabIndex={0}
-      >
-        {TASK_STATUSES.map((status) => (
-          <KanbanColumn
-            key={status}
-            status={status}
-            tasks={tasks
-              .filter((t) => t.status === status)
-              .sort((a, b) => a.position - b.position)}
-            onSelectTask={onSelectTask}
-            members={members}
-          />
-        ))}
-      </div>
+  const confirmDone = () => {
+    if (!pendingDone) return;
+    const { task, position } = pendingDone;
+    updateTask.mutate(
+      {
+        id: task.id,
+        number: task.number,
+        status: "done",
+        position,
+      },
+      {
+        onSuccess: () => {
+          toast.success("Tarea marcada como hecha.", {
+            label: "Deshacer",
+            onClick: () => {
+              updateTask.mutate({
+                id: task.id,
+                number: task.number,
+                status: "in_progress",
+                position: task.position,
+              });
+            },
+          });
+        },
+      },
+    );
+  };
 
-      <DragOverlay>
-        {activeTask ? (
-          <KanbanCard task={activeTask} isOverlay members={members} />
-        ) : null}
-      </DragOverlay>
-    </DndContext>
+  const confirmReopen = () => {
+    if (!pendingReopen) return;
+    const task = pendingReopen;
+    updateTask.mutate({
+      id: task.id,
+      number: task.number,
+      status: "in_progress",
+      position: task.position,
+    });
+  };
+
+  return (
+    <>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={closestCorners}
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+        onDragCancel={handleDragCancel}
+      >
+        <div
+          className="grid min-w-0 grid-cols-1 gap-px border border-border bg-border sm:grid-cols-3"
+          role="region"
+          aria-label="Tablero de tareas"
+          tabIndex={0}
+        >
+          {TASK_STATUSES.map((status) => (
+            <KanbanColumn
+              key={status}
+              status={status}
+              tasks={tasks
+                .filter((t) => t.status === status)
+                .sort((a, b) => a.position - b.position)}
+              onSelectTask={onSelectTask}
+              members={members}
+              onReopen={setPendingReopen}
+            />
+          ))}
+        </div>
+
+        <DragOverlay>
+          {activeTask ? (
+            <KanbanCard task={activeTask} isOverlay members={members} />
+          ) : null}
+        </DragOverlay>
+      </DndContext>
+      {pendingDone && (
+        <ConfirmDialog
+          title={`Marcar ${pendingDone.task.identifier} como hecha`}
+          description="Confirma que esta tarea ya está terminada."
+          confirmLabel="Marcar como hecha"
+          onClose={() => setPendingDone(null)}
+          onConfirm={confirmDone}
+        />
+      )}
+      {pendingReopen && (
+        <ConfirmDialog
+          title={`Reabrir ${pendingReopen.identifier}`}
+          description="La tarea volverá al estado En progreso."
+          confirmLabel="Reabrir tarea"
+          onClose={() => setPendingReopen(null)}
+          onConfirm={confirmReopen}
+        />
+      )}
+    </>
   );
 }
 

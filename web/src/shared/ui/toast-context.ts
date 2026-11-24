@@ -1,8 +1,12 @@
 import { createContext, useContext } from "react";
 
 export type ToastKind = "success" | "error";
+export type ToastAction = {
+  label: string;
+  onClick: () => void;
+};
 export type ToastContextValue = {
-  success: (message: string) => void;
+  success: (message: string, action?: ToastAction) => void;
   error: (message: string) => void;
 };
 
