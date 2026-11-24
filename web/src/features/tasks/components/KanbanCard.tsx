@@ -11,22 +11,28 @@ export function KanbanCard({
   isOverlay = false,
   onClick,
   members = [],
+  canMove = true,
+  isMine = false,
   onReopen,
 }: {
   task: TaskResponseDto;
   isOverlay?: boolean;
   onClick?: () => void;
   members?: WorkspaceMemberResponseDto[];
+  canMove?: boolean;
+  isMine?: boolean;
   onReopen?: () => void;
 }) {
   if (isOverlay) {
-    return <CardBody task={task} members={members} />;
+    return <CardBody task={task} members={members} isMine={isMine} />;
   }
   return (
     <SortableCard
       task={task}
       onClick={onClick}
       members={members}
+      canMove={canMove}
+      isMine={isMine}
       onReopen={onReopen}
     />
   );
@@ -36,11 +42,15 @@ function SortableCard({
   task,
   onClick,
   members,
+  canMove,
+  isMine,
   onReopen,
 }: {
   task: TaskResponseDto;
   onClick?: () => void;
   members: WorkspaceMemberResponseDto[];
+  canMove: boolean;
+  isMine: boolean;
   onReopen?: () => void;
 }) {
   const {
@@ -50,7 +60,7 @@ function SortableCard({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id });
+  } = useSortable({ id: task.id, disabled: !canMove });
 
   return (
     <div
@@ -60,12 +70,17 @@ function SortableCard({
         transition,
         opacity: isDragging ? 0.4 : 1,
       }}
-      {...attributes}
-      {...listeners}
+      {...(canMove ? attributes : {})}
+      {...(canMove ? listeners : {})}
       onClick={onClick}
-      className="group cursor-grab touch-pan-y active:cursor-grabbing"
+      className={`group touch-pan-y ${canMove ? "cursor-grab active:cursor-grabbing" : ""}`}
     >
-      <CardBody task={task} members={members} onReopen={onReopen} />
+      <CardBody
+        task={task}
+        members={members}
+        isMine={isMine}
+        onReopen={onReopen}
+      />
     </div>
   );
 }
@@ -73,20 +88,33 @@ function SortableCard({
 function CardBody({
   task,
   members,
+  isMine = false,
   onReopen,
 }: {
   task: TaskResponseDto;
   members: WorkspaceMemberResponseDto[];
+  isMine?: boolean;
   onReopen?: () => void;
 }) {
   const member = members.find((item) => item.userId === task.assigneeId);
 
   return (
-    <div className="flex flex-col gap-2 border border-border bg-card p-3 transition-all duration-150 ease-out motion-reduce:transition-none group-hover:border-primary/40 group-hover:shadow-sm">
+    <div
+      className={`flex flex-col gap-2 border border-border bg-card p-3 transition-all duration-150 ease-out motion-reduce:transition-none group-hover:border-primary/40 group-hover:shadow-sm ${
+        isMine ? "border-l-2 border-l-primary bg-primary/[0.04]" : ""
+      }`}
+    >
       <div className="flex items-start justify-between gap-2">
-        <span className="font-mono text-[10px] text-muted-foreground tabular">
-          {task.identifier}
-        </span>
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="font-mono text-[10px] text-muted-foreground tabular">
+            {task.identifier}
+          </span>
+          {isMine && (
+            <span className="border border-primary/30 bg-primary/10 px-1 py-0.5 font-mono text-[9px] leading-none tracking-wide text-primary">
+              TUYA
+            </span>
+          )}
+        </div>
         <TaskPriorityBadge priority={task.priority} />
       </div>
       <p className="text-sm text-foreground line-clamp-2">{task.title}</p>

@@ -38,10 +38,13 @@ type Tab = "list" | "board";
 
 function ProjectDetailPage() {
   const { workspaceSlug, projectKey } = Route.useParams();
+  const { auth } = Route.useRouteContext();
   const project = useProject(workspaceSlug, projectKey);
   const tasks = useTasks(workspaceSlug, projectKey);
   const workspaceQuery = useWorkspace(workspaceSlug);
   const workspace = workspaceQuery.data;
+  const canManageTasks =
+    workspace?.role === "owner" || workspace?.role === "admin";
   const membersQuery = useMembers(workspaceSlug);
   const members = membersQuery.data ?? [];
   const [createOpen, setCreateOpen] = useState(false);
@@ -223,6 +226,8 @@ function ProjectDetailPage() {
             groupBy={groupBy}
             workspaceSlug={workspaceSlug}
             projectKey={projectKey}
+            currentUserId={auth.user.id}
+            canManageTasks={canManageTasks}
             onSelectTask={setSelectedTask}
           />
         ) : (
@@ -231,6 +236,8 @@ function ProjectDetailPage() {
             members={members}
             workspaceSlug={workspaceSlug}
             projectKey={projectKey}
+            currentUserId={auth.user.id}
+            canManageTasks={canManageTasks}
             onSelectTask={setSelectedTask}
           />
         )
@@ -279,6 +286,8 @@ function ProjectDetailPage() {
         onClose={() => setSelectedTask(null)}
         workspaceSlug={workspaceSlug}
         projectKey={projectKey}
+        currentUserId={auth.user.id}
+        canManageTasks={canManageTasks}
       />
       {deleteOpen && (
         <ConfirmDialog

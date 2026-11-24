@@ -44,7 +44,9 @@ export class TaskController {
   };
 
   update = async (req: Request, res: Response): Promise<void> => {
-    if (!req.project || !req.user) throw AppError.unauthorized();
+    if (!req.project || !req.user || !req.member) {
+      throw AppError.unauthorized();
+    }
     const number = parseTaskNumber(req.params.taskNumber);
     const input = updateTaskSchema.parse(req.body);
     const task = await this.taskService.update(
@@ -54,6 +56,7 @@ export class TaskController {
       number,
       input,
       req.user.id,
+      req.member.role,
     );
     res.json({ task });
   };

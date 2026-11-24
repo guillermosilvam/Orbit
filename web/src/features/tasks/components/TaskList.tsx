@@ -23,6 +23,8 @@ type Props = {
   groupBy?: TaskGroupBy;
   workspaceSlug: string;
   projectKey: string;
+  currentUserId: string;
+  canManageTasks: boolean;
   onSelectTask: (task: TaskResponseDto) => void;
 };
 
@@ -49,6 +51,8 @@ export function TaskList({
   onSelectTask,
   workspaceSlug,
   projectKey,
+  currentUserId,
+  canManageTasks,
 }: Props) {
   const grouped = groupTasks(tasks, members, groupBy);
   const updateTask = useUpdateTask(workspaceSlug, projectKey);
@@ -117,7 +121,11 @@ export function TaskList({
                     (item) => item.userId === task.assigneeId,
                   )}
                   onClick={() => onSelectTask(task)}
-                  onReopen={() => setPendingReopen(task)}
+                  onReopen={
+                    canManageTasks || task.assigneeId === currentUserId
+                      ? () => setPendingReopen(task)
+                      : undefined
+                  }
                 />
               ))}
             </div>
@@ -130,6 +138,7 @@ export function TaskList({
         title={`Reabrir ${pendingReopen.identifier}`}
         description="La tarea volverá al estado En progreso."
         confirmLabel="Reabrir tarea"
+        confirmVariant="primary"
         onClose={() => setPendingReopen(null)}
         onConfirm={confirmReopen}
       />
@@ -147,7 +156,7 @@ function TaskRow({
   task: TaskResponseDto;
   member?: WorkspaceMemberResponseDto;
   onClick: () => void;
-  onReopen: () => void;
+  onReopen?: () => void;
 }) {
   return (
     <div className="flex w-full items-center gap-2 border-b border-border px-3 py-2 text-left transition-colors last:border-b-0 hover:bg-accent sm:gap-3 sm:px-4">
@@ -163,7 +172,7 @@ function TaskRow({
           {task.title}
         </span>
       </button>
-      {task.status === "done" ? (
+      {task.status === "done" && onReopen ? (
         <button
           type="button"
           onClick={onReopen}

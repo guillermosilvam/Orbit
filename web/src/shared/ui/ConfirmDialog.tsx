@@ -1,5 +1,5 @@
 import { useEffect, useState, type FormEvent } from "react";
-import { Button } from "./Button";
+import { Button, type ButtonProps } from "./Button";
 import { Field } from "./Field";
 import { Input } from "./Input";
 
@@ -7,6 +7,7 @@ type Props = {
   title: string;
   description: string;
   confirmLabel: string;
+  confirmVariant?: ButtonProps["variant"];
   onClose: () => void;
   onConfirm: () => void;
   requiredText?: string;
@@ -16,6 +17,7 @@ export function ConfirmDialog({
   title,
   description,
   confirmLabel,
+  confirmVariant = "destructive",
   onClose,
   onConfirm,
   requiredText,
@@ -89,7 +91,7 @@ export function ConfirmDialog({
             </Button>
             <Button
               type="submit"
-              variant="destructive"
+              variant={confirmVariant}
               disabled={!canConfirm}
             >
               {confirmLabel}

@@ -30,12 +30,16 @@ export function KanbanBoard({
   projectKey,
   onSelectTask,
   members = [],
+  currentUserId,
+  canManageTasks,
 }: {
   tasks: TaskResponseDto[];
   workspaceSlug: string;
   projectKey: string;
   onSelectTask: (task: TaskResponseDto) => void;
   members?: WorkspaceMemberResponseDto[];
+  currentUserId: string;
+  canManageTasks: boolean;
 }) {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [pendingDone, setPendingDone] = useState<{
@@ -72,7 +76,10 @@ export function KanbanBoard({
     }
 
     const activeTask = tasks.find((t) => t.id === active.id);
-    if (!activeTask) {
+    if (
+      !activeTask ||
+      (!canManageTasks && activeTask.assigneeId !== currentUserId)
+    ) {
       setActiveId(null);
       return;
     }
@@ -177,14 +184,37 @@ export function KanbanBoard({
                 .sort((a, b) => a.position - b.position)}
               onSelectTask={onSelectTask}
               members={members}
-              onReopen={setPendingReopen}
+              currentUserId={currentUserId}
+              canMoveTask={(task) =>
+                canManageTasks || task.assigneeId === currentUserId
+              }
+              canReopenTask={(task) =>
+                canManageTasks || task.assigneeId === currentUserId
+              }
+              onReopen={
+                status === "done"
+                  ? (task) => {
+                      if (
+                        canManageTasks ||
+                        task.assigneeId === currentUserId
+                      ) {
+                        setPendingReopen(task);
+                      }
+                    }
+                  : undefined
+              }
             />
           ))}
         </div>
 
         <DragOverlay>
           {activeTask ? (
-            <KanbanCard task={activeTask} isOverlay members={members} />
+            <KanbanCard
+              task={activeTask}
+              isOverlay
+              members={members}
+              isMine={activeTask.assigneeId === currentUserId}
+            />
           ) : null}
         </DragOverlay>
       </DndContext>
@@ -202,6 +232,7 @@ export function KanbanBoard({
           title={`Reabrir ${pendingReopen.identifier}`}
           description="La tarea volverá al estado En progreso."
           confirmLabel="Reabrir tarea"
+          confirmVariant="primary"
           onClose={() => setPendingReopen(null)}
           onConfirm={confirmReopen}
         />

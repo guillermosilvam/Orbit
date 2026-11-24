@@ -9,6 +9,7 @@ import type {
 } from "./dto/task.dto.ts";
 import { toTaskResponseDto } from "./dto/task.dto.ts";
 import { recordActivity } from "../activity/activity.service.ts";
+import type { WorkspaceRole } from "../../entities/workspace-member.entity.ts";
 
 const POSITION_GAP = 1000;
 
@@ -98,6 +99,7 @@ export class TaskService {
     number: number,
     input: UpdateTaskInputDto,
     actorId: string,
+    actorRole: WorkspaceRole,
   ): Promise<TaskResponseDto> {
     return this.dataSource.transaction(async (manager) => {
       const task = await manager.findOne(Task, {
@@ -106,6 +108,22 @@ export class TaskService {
       });
       if (!task) throw AppError.notFound("Task not found");
       const previousStatus = task.status;
+      const positionChanged =
+        input.position !== undefined &&
+        Number(task.position) !== input.position;
+      const statusChanged =
+        input.status !== undefined && input.status !== task.status;
+
+      if (
+        (statusChanged || positionChanged) &&
+        actorRole !== "owner" &&
+        actorRole !== "admin" &&
+        task.assigneeId !== actorId
+      ) {
+        throw AppError.forbidden(
+          "Solo la persona asignada o un administrador puede mover esta tarea",
+        );
+      }
 
       if (input.title !== undefined) task.title = input.title;
       if (input.description !== undefined) task.description = input.description;

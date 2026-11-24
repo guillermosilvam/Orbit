@@ -38,6 +38,8 @@ type Props = {
   onClose: () => void;
   workspaceSlug: string;
   projectKey: string;
+  currentUserId: string;
+  canManageTasks: boolean;
 };
 
 export function TaskDetailDrawer({
@@ -45,6 +47,8 @@ export function TaskDetailDrawer({
   onClose,
   workspaceSlug,
   projectKey,
+  currentUserId,
+  canManageTasks,
 }: Props) {
   const update = useUpdateTaskFields(workspaceSlug, projectKey);
   const toast = useToast();
@@ -101,6 +105,8 @@ export function TaskDetailDrawer({
   }, [isDirty, reset, task, taskData]);
 
   if (!task) return null;
+  const canChangeStatus =
+    canManageTasks || task.assigneeId === currentUserId;
 
   const onSubmit = form.handleSubmit((data) => {
     const payload: UpdateTaskInputDto = {
@@ -160,7 +166,7 @@ export function TaskDetailDrawer({
             <TaskStatusBadge status={task.status} />
           </div>
           <div className="flex items-center gap-1">
-            {task.status === "done" && (
+            {task.status === "done" && canChangeStatus && (
               <button
                 type="button"
                 onClick={() => setPendingReopen(true)}
@@ -216,32 +222,36 @@ export function TaskDetailDrawer({
                 <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
                   Estado
                 </label>
-                <Controller
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <SearchableSelect
-                      label="Estado"
-                      value={field.value ?? "todo"}
-                      options={
-                        task.status === "done"
-                          ? [{ value: "done", label: "Hecho" }]
-                          : TASK_STATUSES.map((status) => ({
-                              value: status,
-                              label: statusLabel(status),
-                            }))
-                      }
-                      onChange={(status) => {
-                        if (status === "done" && task.status !== "done") {
-                          setPendingDone(true);
-                        } else if (task.status !== "done") {
-                          field.onChange(status);
+                {canChangeStatus ? (
+                  <Controller
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <SearchableSelect
+                        label="Estado"
+                        value={field.value ?? "todo"}
+                        options={
+                          task.status === "done"
+                            ? [{ value: "done", label: "Hecho" }]
+                            : TASK_STATUSES.map((status) => ({
+                                value: status,
+                                label: statusLabel(status),
+                              }))
                         }
-                      }}
-                      className="w-full [&>button]:w-full"
-                    />
-                  )}
-                />
+                        onChange={(status) => {
+                          if (status === "done" && task.status !== "done") {
+                            setPendingDone(true);
+                          } else if (task.status !== "done") {
+                            field.onChange(status);
+                          }
+                        }}
+                        className="w-full [&>button]:w-full"
+                      />
+                    )}
+                  />
+                ) : (
+                  <TaskStatusBadge status={task.status} />
+                )}
               </div>
 
               <div className="bg-card p-3">
@@ -412,6 +422,7 @@ export function TaskDetailDrawer({
           title={`Reabrir ${task.identifier}`}
           description="La tarea volverá al estado En progreso."
           confirmLabel="Reabrir tarea"
+          confirmVariant="primary"
           onClose={() => setPendingReopen(false)}
           onConfirm={() => {
             update.mutate({
